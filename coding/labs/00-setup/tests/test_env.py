@@ -14,5 +14,6 @@ def test_import_pydantic():
 
 def test_dotenv_loads():
     load_dotenv()
-    # Key may be empty in CI; file load should not raise
+    # 国内学习默认检查 DeepSeek；OpenAI Key 可选
+    _ = os.getenv("DEEPSEEK_API_KEY", "")
     _ = os.getenv("OPENAI_API_KEY", "")

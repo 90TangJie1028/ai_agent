@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "model-gateway"
 version = "0.1.0"
-description = "P1 Model Gateway — Agent learning project"
+description = "P1 Model Gateway — Agent learning project (DeepSeek-first)"
 requires-python = ">=3.11"
 dependencies = [
     "openai>=1.40.0",
@@ -27,3 +27,6 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+markers = [
+    "integration: 需要真实 API Key 与网络，手动执行 pytest -m integration",
+]

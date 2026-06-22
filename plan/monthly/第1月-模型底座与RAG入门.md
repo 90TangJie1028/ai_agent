@@ -15,7 +15,7 @@
 ## 本月验收（月末自查）
 
 - [ ] P1：`bench --n 20` 报告完整
-- [ ] P1：OpenAI + DeepSeek 双模型切换
+- [ ] P1：DeepSeek + Moonshot（或通义）双模型切换
 - [ ] P2：`ingest` + `ask` 带引用回答
 - [ ] P2：混合检索 + rerank 可开关对比
 - [ ] 笔记：`notes/concepts/` 至少 4 篇
@@ -23,7 +23,7 @@
 
 ## 本月推荐阅读
 
-- OpenAI Responses API / Structured Outputs 官方文档
+- DeepSeek API 文档 / Chat Completions 概念（OpenAI 文档可作对照）
 - LangChain LCEL 入门
 - LlamaIndex VectorStoreIndex
 

@@ -42,9 +42,12 @@ Lab-00/01 → P1 Gateway → P2 RAG → P3 ReAct → P4 LangGraph → P5 MCP →
 cd e:\work\ai_agent
 python -m venv .venv
 .venv\Scripts\activate
-pip install -r coding/shared/requirements-base.txt
+pip install -r requirements.txt
+copy .env.example .env    # 填入 DEEPSEEK_API_KEY
 pytest coding/labs/00-setup/tests
 ```
+
+**默认模型**：DeepSeek（国内可直接调用）。OpenAI 暂不依赖，原理相通，后续有时间再接入。
 
 ## 当前进度
 

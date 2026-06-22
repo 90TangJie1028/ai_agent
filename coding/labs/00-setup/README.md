@@ -10,5 +10,5 @@ pytest tests/
 
 ## 验收
 
-- [ ] `test_imports.py` 通过
-- [ ] `test_dotenv.py` 通过（无 key 时 skip）
+- [x] `test_imports.py` 通过
+- [x] `test_dotenv.py` 通过（无 key 时 skip）

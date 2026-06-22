@@ -17,7 +17,7 @@
 
 ## D9 · 周二 06-30 · JSON mode vs Structured Outputs
 
-| 学习 30m | OpenAI Structured Outputs 文档；失败重试策略 |
+| 学习 30m | DeepSeek JSON 模式 / `response_format`；失败重试策略（OpenAI 文档可作参考） |
 | 编码 120m | 对比实验脚本 `experiments/structured_vs_json.py` |
 | 测试 45m | 同一 prompt 两种模式成功率对比表 |
 | 文档 30m | 实验结论写入笔记 |
@@ -35,27 +35,27 @@
 
 ## D11 · 周四 07-02 · 计算器工具端到端
 
-| 学习 30m | OpenAI tools 参数；parallel tool calls |
-| 编码 120m | `tools/calculator.py`；`gateway.chat_with_tools()` 闭环 |
+| 学习 30m | Function Calling 消息格式；DeepSeek tool_calls 字段 |
+| 编码 120m | `tools/calculator.py`；`gateway.chat_with_tools()` 闭环（默认 DeepSeek） |
 | 测试 45m | 「123 * 456」工具调用 E2E |
 | 文档 30m | 更新 P1 README CLI：`tools calc` |
 
 ---
 
-## D12 · 周五 07-03 · DeepSeek 适配器
+## D12 · 周五 07-03 · Kimi / Moonshot 第二适配器
 
-| 学习 30m | DeepSeek API 兼容 OpenAI 格式差异 |
-| 编码 120m | `adapters/deepseek.py`；`ModelRouter` 按名路由 |
-| 测试 45m | 同一 prompt 双模型各调 1 次 |
-| 文档 30m | `.env.example` 补充 DEEPSEEK 字段 |
+| 学习 30m | Moonshot API 与 DeepSeek 差异（base_url、模型名） |
+| 编码 120m | `adapters/moonshot.py`；`ModelRouter` 按 provider 路由 |
+| 测试 45m | 同一 prompt 在 deepseek / moonshot 各调 1 次（integration） |
+| 文档 30m | `.env.example` 补充 MOONSHOT 字段 |
 
 ---
 
-## D13 · 周六 07-04 · 通义/智谱 + 降级
+## D13 · 周六 07-04 · 通义 + 降级（可选）
 
 | 学习 30m | DashScope OpenAI 兼容接口 |
-| 编码 90m | `adapters/dashscope.py`（或智谱） |
-| 编码 30m | 主模型失败 fallback 次选模型 |
+| 编码 90m | `adapters/dashscope` 或复用 `OpenAICompatAdapter` |
+| 编码 30m | DeepSeek 失败时 fallback 到 moonshot / dashscope |
 | 测试 45m | mock 主模型失败走 fallback |
 | 文档 30m | `notes/projects/P1-总结.md` 初稿 |
 
@@ -70,6 +70,6 @@
 | 计划 15m | 周一：创建 P2 项目骨架 |
 
 **周验收**：
-- [ ] ≥2 模型可切换
+- [ ] DeepSeek + Moonshot（或通义）双模型可切换
 - [ ] 工具参数错误可捕获
 - [ ] P1 README 完整
