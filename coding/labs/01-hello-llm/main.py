@@ -29,7 +29,7 @@ def main() -> None:
 
     response = client.chat.completions.create(
         model=model,
-        messages=[{"role": "user", "content": "介绍一下湖北省武穴市。"}],
+        messages=[{"role": "user", "content": "介绍一下美国特朗普总统。"}],
     )
 
     message = response.choices[0].message.content

@@ -1,5 +1,9 @@
 """ModelGateway：统一多模型调用入口。"""
 
+# "from __future__ import annotations" 的作用是允许在 Python 代码中，
+# 类型注解可以用字符串表示自己定义类型，即使类型在文件中是稍后才定义的。
+# 这主要用于提升类型注解的兼容性和解决前向引用问题。
+# 对于 Python 3.7 及以上版本推荐使用，可减少循环依赖和提升编辑器类型提示体验。
 from __future__ import annotations
 
 from model_gateway.adapters.base import ChatAdapter, ChatResult

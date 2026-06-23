@@ -1,10 +1,26 @@
-import typer
+# 如果你在查看代码时遇到 “import 'typer' could not be resolved” 的提示，
+# 说明你的 Python 环境（通常是 .venv 虚拟环境）没有安装 typer。
+# 推荐在项目根目录下的 .venv 虚拟环境中安装依赖包（这样不会影响全局 Python 环境）。
+# 安装方法如下（假设你已在项目目录下且 .venv 已创建并激活）：
+#   pip install typer
+# 如果还没有创建虚拟环境，可以先运行：
+#   python -m venv .venv
+#   source .venv/bin/activate  (Linux/macOS)
+#   .venv\Scripts\activate     (Windows)
+# 然后再安装 typer：
+#   pip install typer
+
+# 这个模块用于定义基于 Typer 包的命令行界面（CLI），
+# 提供通过命令行便捷调用 Model Gateway 各类功能的方式。
+import typer  # noqa
 
 from model_gateway.gateway import ModelGateway
 
 app = typer.Typer(help="P1 Model Gateway CLI — 默认 DeepSeek")
 
 
+# 这个装饰器将下面的函数注册为 CLI 的一个子命令，
+# 当用户运行 `python -m model_gateway.cli chat` 时，会调用这个函数。
 @app.command()
 def chat(
     message: str,

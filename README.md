@@ -21,12 +21,12 @@ ai_agent/
 └── Agent岗位招聘需求调研与技能对标分析.md
 ```
 
-## 今天怎么学（Day 1）
+## 今天怎么学（Day 2）
 
-1. 打开 **[plan/weekly/week-01.md](plan/weekly/week-01.md)** — 按 D1 四时段执行  
-2. 代码写在 **`coding/`** — 从 `labs/00-setup` 开始  
-3. 笔记写在 **`notes/concepts/00-开发环境.md`**  
-4. 学完在 **[plan/daily/打卡索引.md](plan/daily/打卡索引.md)** D1 打勾  
+1. 打开 **[plan/weekly/week-01.md](plan/weekly/week-01.md)** — 按 D2 四时段执行  
+2. 代码：**`coding/labs/01-hello-llm`** + **`coding/projects/01-model-gateway`**  
+3. 笔记：**[notes/concepts/01-LLM-API基础.md](notes/concepts/01-LLM-API基础.md)**  
+4. 学完在 **[plan/daily/打卡索引.md](plan/daily/打卡索引.md)** D2 打勾  
 
 ## 练习项目路线
 
@@ -51,4 +51,4 @@ pytest coding/labs/00-setup/tests
 
 ## 当前进度
 
-**第 1 周 · D1** — 环境搭建（2026-06-22）
+**第 1 周 · D2** — Hello LLM + Gateway（2026-06-23）
