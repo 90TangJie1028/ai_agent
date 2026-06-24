@@ -64,6 +64,13 @@
 | 计划  | 15  | 明日：令牌桶限流                                      |                                 |
 
 
+**编码清单**：
+
+- [x] `retry.py`：`RetryPolicy`、`is_retryable`、`backoff_delay`、`@with_retry`
+- [x] `openai_compat._create_completion` 集成重试 + timeout
+- [x] `gateway.chat(..., timeout=)` 透传
+- [x] `GATEWAY_TIMEOUT_SEC` 环境变量
+
 **今日验收**：重试测试全绿
 
 ---

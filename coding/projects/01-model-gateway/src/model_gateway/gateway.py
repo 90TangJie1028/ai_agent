@@ -44,6 +44,7 @@ class ModelGateway:
         *,
         provider: str | None = None,
         model: str | None = None,
+        timeout: float | None = None,
     ) -> ChatResult:
         name = (provider or self._default_provider).lower()
         if name not in self._adapters:
@@ -53,4 +54,4 @@ class ModelGateway:
                 f" 当前可用: {configured}"
             )
         model_name = model or self._providers[name].default_model
-        return self._adapters[name].chat(message, model=model_name)
+        return self._adapters[name].chat(message, model=model_name, timeout=timeout)

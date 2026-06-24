@@ -38,7 +38,13 @@ class ChatAdapter(Protocol):
     provider: str  # 适配器对应的提供者名称
 
     # 下面这个方法的意思是：所有实现了 ChatAdapter 协议的类都要有这个 chat 方法，类似 TypeScript 里的 interface 要求实现的函数
-    def chat(self, message: str, *, model: str | None = None) -> ChatResult:
+    def chat(
+        self,
+        message: str,
+        *,
+        model: str | None = None,
+        timeout: float | None = None,
+    ) -> ChatResult:
         """发送 message 给指定模型，返回 ChatResult 结果"""
         ...
 

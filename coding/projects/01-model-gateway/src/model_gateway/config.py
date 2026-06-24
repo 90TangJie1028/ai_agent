@@ -88,6 +88,11 @@ def get_default_model() -> str:
     return os.getenv("DEFAULT_MODEL", "deepseek-chat").strip()
 
 
+def get_gateway_timeout() -> float:
+    """单次 chat 请求超时（秒），传给 OpenAI SDK。"""
+    return float(os.getenv("GATEWAY_TIMEOUT_SEC", "60"))
+
+
 def load_providers() -> dict[str, ProviderConfig]:
     """已配置 Key 的厂商；未配置 Key 的厂商不会出现在字典中。"""
     providers: dict[str, ProviderConfig] = {}
