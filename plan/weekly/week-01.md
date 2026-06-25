@@ -87,6 +87,14 @@
 | 计划  | 15  | 明日：实现 metrics 统计                      |                                   |
 
 
+**编码清单**：
+
+- [x] `ratelimit.py`：`TokenBucket`、`RateLimitConfig`、`async acquire`
+- [x] `gateway.py`：`async_chat`、`async_chat_batch` + Semaphore
+- [x] `config.py`：`GATEWAY_QPS` / `GATEWAY_RATE_BURST` / `GATEWAY_MAX_CONCURRENT`
+- [x] `metrics.py` 字段注释草案
+- [x] `tests/test_ratelimit.py` 6 项全绿
+
 **今日验收**：10 并发无异常；超限请求被排队或拒绝
 
 ---

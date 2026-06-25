@@ -93,6 +93,22 @@ def get_gateway_timeout() -> float:
     return float(os.getenv("GATEWAY_TIMEOUT_SEC", "60"))
 
 
+def get_gateway_qps() -> float:
+    """客户端稳态 QPS 上限（令牌桶补充速率）。"""
+    return float(os.getenv("GATEWAY_QPS", "5"))
+
+
+def get_gateway_rate_burst() -> int:
+    """令牌桶容量；0 表示自动取 max(1, int(QPS))。"""
+    raw = os.getenv("GATEWAY_RATE_BURST", "0").strip()
+    return int(raw)
+
+
+def get_gateway_max_concurrent() -> int:
+    """async_chat 同时在飞请求数上限。"""
+    return int(os.getenv("GATEWAY_MAX_CONCURRENT", "10"))
+
+
 def load_providers() -> dict[str, ProviderConfig]:
     """已配置 Key 的厂商；未配置 Key 的厂商不会出现在字典中。"""
     providers: dict[str, ProviderConfig] = {}

@@ -27,6 +27,7 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+asyncio_mode = "auto"
 markers = [
     "integration: 需要真实 API Key 与网络，手动执行 pytest -m integration",
 ]

@@ -1,24 +1,45 @@
 """ModelGateway：统一多模型调用入口。"""
 
-# "from __future__ import annotations" 的作用是允许在 Python 代码中，
-# 类型注解可以用字符串表示自己定义类型，即使类型在文件中是稍后才定义的。
-# 这主要用于提升类型注解的兼容性和解决前向引用问题。
-# 对于 Python 3.7 及以上版本推荐使用，可减少循环依赖和提升编辑器类型提示体验。
 from __future__ import annotations
+
+import asyncio
 
 from model_gateway.adapters.base import ChatAdapter, ChatResult
 from model_gateway.adapters.deepseek import DeepSeekAdapter
 from model_gateway.adapters.moonshot import MoonshotAdapter
 from model_gateway.adapters.openai_compat import OpenAICompatAdapter
 from model_gateway.adapters.openai_provider import OpenAIProviderAdapter
-from model_gateway.config import get_default_provider, load_providers
+from model_gateway.config import (
+    get_default_provider,
+    get_gateway_max_concurrent,
+    get_gateway_qps,
+    get_gateway_rate_burst,
+    load_providers,
+)
+from model_gateway.ratelimit import RateLimitConfig, TokenBucket
+
+
+def _default_rate_limiter() -> TokenBucket:
+    burst_env = get_gateway_rate_burst()
+    burst = burst_env if burst_env > 0 else max(1, int(get_gateway_qps()))
+    return TokenBucket.from_config(RateLimitConfig(rate=get_gateway_qps(), burst=burst))
 
 
 class ModelGateway:
-    def __init__(self, provider: str | None = None) -> None:
+    def __init__(
+        self,
+        provider: str | None = None,
+        *,
+        rate_limiter: TokenBucket | None = None,
+        max_concurrent: int | None = None,
+    ) -> None:
         self._providers = load_providers()
         self._default_provider = provider or get_default_provider()
         self._adapters = self._build_adapters()
+        self._rate_limiter = rate_limiter or _default_rate_limiter()
+        self._concurrency = asyncio.Semaphore(
+            max_concurrent if max_concurrent is not None else get_gateway_max_concurrent()
+        )
 
     def _build_adapters(self) -> dict[str, ChatAdapter]:
         mapping: dict[str, type[OpenAICompatAdapter]] = {
@@ -41,6 +62,8 @@ class ModelGateway:
     def chat(
         self,
         message: str,
+        # * 表示此处以下参数必须作为关键字参数（必须加参数名传入，不能位置传参）
+        # Python 3 的“仅关键字参数”标记，类似 TypeScript、Java、C++ 无强制命名参数，对应 Lua 使用 table 传名值对
         *,
         provider: str | None = None,
         model: str | None = None,
@@ -55,3 +78,42 @@ class ModelGateway:
             )
         model_name = model or self._providers[name].default_model
         return self._adapters[name].chat(message, model=model_name, timeout=timeout)
+
+    async def async_chat(
+        self,
+        message: str,
+        *,
+        provider: str | None = None,
+        model: str | None = None,
+        timeout: float | None = None,
+    ) -> ChatResult:
+        """异步 chat：Semaphore 限并发，令牌桶限 QPS，同步 SDK 走 to_thread。"""
+        async with self._concurrency:
+            await self._rate_limiter.acquire()
+            return await asyncio.to_thread(
+                self.chat,
+                message,
+                provider=provider,
+                model=model,
+                timeout=timeout,
+            )
+
+    async def async_chat_batch(
+        self,
+        messages: list[str],
+        *,
+        provider: str | None = None,
+        model: str | None = None,
+        timeout: float | None = None,
+    ) -> list[ChatResult]:
+        """批量并发 chat；并发上限由 Gateway Semaphore 控制。"""
+        tasks = [
+            self.async_chat(
+                msg,
+                provider=provider,
+                model=model,
+                timeout=timeout,
+            )
+            for msg in messages
+        ]
+        return list(await asyncio.gather(*tasks))
