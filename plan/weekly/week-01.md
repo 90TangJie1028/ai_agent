@@ -111,6 +111,13 @@
 | 计划  | 15  | 明日：bench 脚本                                              |                                |
 
 
+**编码清单**：
+
+- [x] `metrics.py`：`CallRecord`、`GatewayResult`、`MetricsCollector`、`compute_cost_usd`
+- [x] `gateway.py`：`chat` 返回 `GatewayResult`；失败路径 `from_error`
+- [x] `config/pricing.yaml`
+- [x] `tests/test_metrics.py`
+
 **今日验收**：每次 chat 返回结构化 `CallRecord`
 
 ---

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 
-from model_gateway.adapters.base import ChatAdapter, ChatResult
+from model_gateway.adapters.base import ChatAdapter
 from model_gateway.adapters.deepseek import DeepSeekAdapter
 from model_gateway.adapters.moonshot import MoonshotAdapter
 from model_gateway.adapters.openai_compat import OpenAICompatAdapter
@@ -16,6 +16,7 @@ from model_gateway.config import (
     get_gateway_rate_burst,
     load_providers,
 )
+from model_gateway.metrics import CallRecord, GatewayResult
 from model_gateway.ratelimit import RateLimitConfig, TokenBucket
 
 
@@ -68,7 +69,7 @@ class ModelGateway:
         provider: str | None = None,
         model: str | None = None,
         timeout: float | None = None,
-    ) -> ChatResult:
+    ) -> GatewayResult:
         name = (provider or self._default_provider).lower()
         if name not in self._adapters:
             configured = ", ".join(self.available_providers) or "无"
@@ -77,7 +78,13 @@ class ModelGateway:
                 f" 当前可用: {configured}"
             )
         model_name = model or self._providers[name].default_model
-        return self._adapters[name].chat(message, model=model_name, timeout=timeout)
+        try:
+            chat_result = self._adapters[name].chat(message, model=model_name, timeout=timeout)
+        except Exception as e:
+            record = CallRecord.from_error(provider=name, model=model_name, exc=e)
+            return GatewayResult(result=None, record=record)
+        record = CallRecord.from_chat_result(chat_result)
+        return GatewayResult(result=chat_result, record=record)
 
     async def async_chat(
         self,
@@ -86,7 +93,7 @@ class ModelGateway:
         provider: str | None = None,
         model: str | None = None,
         timeout: float | None = None,
-    ) -> ChatResult:
+    ) -> GatewayResult:
         """异步 chat：Semaphore 限并发，令牌桶限 QPS，同步 SDK 走 to_thread。"""
         async with self._concurrency:
             await self._rate_limiter.acquire()
@@ -105,7 +112,7 @@ class ModelGateway:
         provider: str | None = None,
         model: str | None = None,
         timeout: float | None = None,
-    ) -> list[ChatResult]:
+    ) -> list[GatewayResult]:
         """批量并发 chat；并发上限由 Gateway Semaphore 控制。"""
         tasks = [
             self.async_chat(

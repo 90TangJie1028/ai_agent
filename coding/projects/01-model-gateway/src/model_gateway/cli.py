@@ -29,12 +29,18 @@ def chat(
 ):
     """发送一条 chat 消息。"""
     gateway = ModelGateway()
-    result = gateway.chat(message, provider=provider, model=model)
+    gw = gateway.chat(message, provider=provider, model=model)
+    record = gw.record
+    if gw.result is None:
+        typer.echo(f"调用失败: {record.error_type}", err=True)
+        raise typer.Exit(code=1)
+    result = gw.result
     typer.echo(result.content)
     typer.echo(
         f"\n[{result.provider}/{result.model}] "
         f"tokens={result.total_tokens} "
-        f"(prompt={result.prompt_tokens}, completion={result.completion_tokens})",
+        f"(prompt={result.prompt_tokens}, completion={result.completion_tokens}) "
+        f"latency={result.latency_ms}ms cost=${record.cost_usd:.6f}",
         err=True,
     )
 

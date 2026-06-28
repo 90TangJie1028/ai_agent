@@ -40,11 +40,12 @@ def test_gateway_chat_mock(deepseek_config: ProviderConfig):
             mock_client.chat.completions.create.return_value = mock_response
 
             gateway = ModelGateway(provider="deepseek")
-            result = gateway.chat("你好")
+            gw = gateway.chat("你好")
 
-    assert result.content == "你好，我是 Agent"
-    assert result.provider == "deepseek"
-    assert result.total_tokens == 15
+    assert gw.result.content == "你好，我是 Agent"
+    assert gw.result.provider == "deepseek"
+    assert gw.result.total_tokens == 15
+    assert gw.record.total_tokens == 15
 
 
 # 这是 pytest 的一个标记（marker），用于将 test_gateway_chat_live 测试用例打上 integration 标签。
@@ -57,5 +58,5 @@ def test_gateway_chat_live():
         pytest.skip("未配置 DEEPSEEK_API_KEY")
 
     result = gateway.chat("回复 OK 两个字母")
-    assert result.content
-    assert result.total_tokens > 0
+    assert result.result.content
+    assert result.record.total_tokens > 0

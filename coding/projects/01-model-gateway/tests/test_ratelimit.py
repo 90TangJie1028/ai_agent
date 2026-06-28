@@ -9,6 +9,7 @@ import pytest
 from model_gateway.adapters.base import ChatResult
 from model_gateway.config import ProviderConfig
 from model_gateway.gateway import ModelGateway
+from model_gateway.metrics import CallRecord, GatewayResult
 from model_gateway.ratelimit import RateLimitConfig, TokenBucket
 
 
@@ -73,7 +74,7 @@ async def test_async_chat_ten_concurrent(deepseek_config: ProviderConfig):
             results = await gateway.async_chat_batch([f"ping-{i}" for i in range(10)])
 
     assert len(results) == 10
-    assert all(r.content == "ok" for r in results)
+    assert all(r.result.content == "ok" for r in results)
     assert mock_client.chat.completions.create.call_count == 10
 
 
@@ -114,14 +115,24 @@ async def test_async_chat_mock_without_network(deepseek_config: ProviderConfig):
     with patch("model_gateway.gateway.load_providers", return_value={"deepseek": deepseek_config}):
         gateway = ModelGateway(provider="deepseek", rate_limiter=limiter, max_concurrent=10)
 
-        fake = ChatResult(
-            content="mocked",
-            model="deepseek-chat",
-            provider="deepseek",
-            total_tokens=3,
+        fake = GatewayResult(
+            result=ChatResult(
+                content="mocked",
+                model="deepseek-chat",
+                provider="deepseek",
+                total_tokens=3,
+            ),
+            record=CallRecord.from_chat_result(
+                ChatResult(
+                    content="mocked",
+                    model="deepseek-chat",
+                    provider="deepseek",
+                    total_tokens=3,
+                )
+            ),
         )
         with patch.object(gateway, "chat", return_value=fake) as mock_chat:
             result = await gateway.async_chat("hello")
 
-    assert result.content == "mocked"
+    assert result.result.content == "mocked"
     mock_chat.assert_called_once_with("hello", provider=None, model=None, timeout=None)

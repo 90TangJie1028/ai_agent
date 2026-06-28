@@ -1,0 +1,20 @@
+# 单价：USD / 1M tokens（2025 参考价，调价只改此文件）
+# 未知 model 走 default
+
+default:
+  input_per_million: 1.0
+  output_per_million: 2.0
+
+models:
+  deepseek-chat:
+    input_per_million: 0.14
+    output_per_million: 0.28
+  moonshot-v1-8k:
+    input_per_million: 0.20
+    output_per_million: 0.20
+  qwen-plus:
+    input_per_million: 0.40
+    output_per_million: 1.20
+  gpt-4o-mini:
+    input_per_million: 0.15
+    output_per_million: 0.60
