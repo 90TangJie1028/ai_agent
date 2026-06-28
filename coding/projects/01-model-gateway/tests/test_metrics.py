@@ -44,6 +44,10 @@ def test_gateway_chat_returns_call_record(deepseek_config: ProviderConfig):
     mock_response.choices = [MagicMock(message=MagicMock(content="hi"))]
     mock_response.usage = MagicMock(prompt_tokens=10, completion_tokens=5, total_tokens=15)
 
+    # 作用：临时用 mock 替换 `model_gateway.gateway.load_providers`，让它返回 {"deepseek": deepseek_config}
+    # 类比 TypeScript：jest.spyOn(gateway, 'load_providers').mockReturnValue(...)
+    # 类比 C++：gmock 设置方法桩返回值
+    # 区别：Python 用 with 语法自动恢复（作用域内有效），TS/Java 需手动 restore
     with patch("model_gateway.gateway.load_providers", return_value={"deepseek": deepseek_config}):
         with patch("model_gateway.adapters.openai_compat.OpenAI") as mock_openai_cls:
             mock_client = mock_openai_cls.return_value

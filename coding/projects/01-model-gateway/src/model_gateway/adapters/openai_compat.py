@@ -35,8 +35,8 @@ class OpenAICompatAdapter:
         timeout: float | None = None,
     ) -> ChatResult:
         model_name = model or self._config.default_model
-        effective_timeout = timeout if timeout is not None else self._timeout
         started = time.perf_counter()
+        effective_timeout = timeout if timeout is not None else self._timeout
 
         response = self._create_completion(
             model_name,

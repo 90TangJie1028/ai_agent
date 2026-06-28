@@ -25,7 +25,7 @@ def deepseek_config() -> ProviderConfig:
 def test_gateway_lists_deepseek_when_configured(deepseek_config: ProviderConfig):
     with patch("model_gateway.gateway.load_providers", return_value={"deepseek": deepseek_config}):
         gateway = ModelGateway(provider="deepseek")
-        assert gateway.available_providers == ["deepseek"]
+        assert gateway.available_providers == ["deepseek", "mock"]
 
 
 def test_gateway_chat_mock(deepseek_config: ProviderConfig):

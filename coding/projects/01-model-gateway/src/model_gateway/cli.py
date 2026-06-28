@@ -12,8 +12,11 @@
 
 # 这个模块用于定义基于 Typer 包的命令行界面（CLI），
 # 提供通过命令行便捷调用 Model Gateway 各类功能的方式。
+from pathlib import Path
+
 import typer  # noqa
 
+from model_gateway.bench import format_summary_table, run_bench
 from model_gateway.gateway import ModelGateway
 
 app = typer.Typer(help="P1 Model Gateway CLI — 默认 DeepSeek")
@@ -57,9 +60,49 @@ def providers():
 
 
 @app.command()
-def bench(n: int = 20):
-    """Run n benchmark calls (TODO D6)."""
-    typer.echo(f"TODO: bench n={n} — 见 plan/weekly/week-01.md D6")
+def bench(
+    n: int = typer.Option(20, "--n", help="调用次数"),
+    provider: str | None = typer.Option(
+        "mock",
+        help="provider 名；默认 mock 离线跑，不烧 API",
+    ),
+    model: str | None = typer.Option(None, help="覆盖默认模型名"),
+    output: Path | None = typer.Option(
+        None,
+        "--output",
+        "-o",
+        help="JSON 报告路径，默认 reports/week01-bench.json",
+    ),
+    use_async: bool = typer.Option(
+        False,
+        "--async",
+        help="走 async_chat_batch（限流+并发）",
+    ),
+):
+    """批量调用 N 次，汇总 token/费用/延迟，输出表格与 JSON 报告。"""
+    try:
+        report, out_path = run_bench(
+            n,
+            provider=provider,
+            model=model,
+            output=output,
+            use_async=use_async,
+        )
+    except ValueError as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(code=1) from exc
+
+    typer.echo(format_summary_table(report.summary))
+    typer.echo(f"\n报告已写入: {out_path}", err=True)
+
+    failures = [r for r in report.records if not r["success"]]
+    if failures:
+        typer.echo(f"\n失败 {len(failures)} 次:", err=True)
+        for row in failures:
+            typer.echo(
+                f"  - {row['provider']}/{row['model']}: {row['error_type']}",
+                err=True,
+            )
 
 
 if __name__ == "__main__":

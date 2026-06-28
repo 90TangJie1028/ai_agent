@@ -168,8 +168,9 @@ class MetricsCollector:
                 "total_cost_usd": 0.0,
                 "p95_latency_ms": 0,
             }
-
+        # 筛选出 success 的 record
         successes = [r for r in self.records if r.success]
+        # 排序 latency_ms
         latencies = sorted(r.latency_ms for r in successes)
         if latencies:
             p95_index = max(0, int(len(latencies) * 0.95) - 1)

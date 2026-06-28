@@ -6,10 +6,12 @@ import asyncio
 
 from model_gateway.adapters.base import ChatAdapter
 from model_gateway.adapters.deepseek import DeepSeekAdapter
+from model_gateway.adapters.mock import MockAdapter
 from model_gateway.adapters.moonshot import MoonshotAdapter
 from model_gateway.adapters.openai_compat import OpenAICompatAdapter
 from model_gateway.adapters.openai_provider import OpenAIProviderAdapter
 from model_gateway.config import (
+    ProviderConfig,
     get_default_provider,
     get_gateway_max_concurrent,
     get_gateway_qps,
@@ -35,6 +37,7 @@ class ModelGateway:
         max_concurrent: int | None = None,
     ) -> None:
         self._providers = load_providers()
+        self._ensure_mock_provider()
         self._default_provider = provider or get_default_provider()
         self._adapters = self._build_adapters()
         self._rate_limiter = rate_limiter or _default_rate_limiter()
@@ -42,13 +45,23 @@ class ModelGateway:
             max_concurrent if max_concurrent is not None else get_gateway_max_concurrent()
         )
 
+    def _ensure_mock_provider(self) -> None:
+        """mock 厂商无需 API Key，始终可用于本地测试。"""
+        if "mock" not in self._providers:
+            self._providers["mock"] = ProviderConfig(
+                name="mock",
+                api_key="mock",
+                base_url="mock://local",
+                default_model="mock-model",
+            )
+
     def _build_adapters(self) -> dict[str, ChatAdapter]:
         mapping: dict[str, type[OpenAICompatAdapter]] = {
             "deepseek": DeepSeekAdapter,
             "moonshot": MoonshotAdapter,
             "openai": OpenAIProviderAdapter,
         }
-        adapters: dict[str, ChatAdapter] = {}
+        adapters: dict[str, ChatAdapter] = {"mock": MockAdapter()}
         for name, cls in mapping.items():
             if name in self._providers:
                 adapters[name] = cls(self._providers[name])
