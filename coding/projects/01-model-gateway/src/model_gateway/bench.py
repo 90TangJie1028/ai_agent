@@ -1,12 +1,5 @@
 """bench：批量调用 Gateway，MetricsCollector 聚合，输出报告。"""
 
-#带 from __future__ import annotations 后，
-# 所有类型注解都以【字符串】形式存到 __annotations__，不会立刻访问实际类型对象。
-# 这样可以在类/函数还没定义或发生循环引用时安全注解。
-
-#例子里，child: Node 实际存为 "Node"，而不是在运行时立即访问 Node 类对象。这允许类内部、跨模块互相注解自身或对方，避免 import 闪退。
-
-# 在实际项目中，复杂类型互引用或 forward declaration 场景尤为有用，比如链表、树结构、A、B 互相关联等。
 from __future__ import annotations
 
 import asyncio

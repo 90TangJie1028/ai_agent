@@ -29,7 +29,17 @@ src/model_gateway/
 tests/
 ```
 
-## 环境配置
+## 安装与运行
+
+```powershell
+# 仓库根目录
+cd e:\work\ai_agent
+.\.venv\Scripts\Activate.ps1
+
+# 可编辑安装 P1（含 dev 依赖）
+cd coding\projects\01-model-gateway
+pip install -e ".[dev]"
+```
 
 复制仓库根目录 `.env.example` → `.env`，至少填入：
 
@@ -38,6 +48,19 @@ DEEPSEEK_API_KEY=你的key
 DEFAULT_PROVIDER=deepseek
 DEFAULT_MODEL=deepseek-chat
 ```
+
+### 常用命令
+
+| 命令 | 说明 |
+|------|------|
+| `python -m model_gateway.cli providers` | 列出已配置 provider |
+| `python -m model_gateway.cli chat "你好"` | 单次对话（默认 deepseek，无 Key 时可用 mock） |
+| `python -m model_gateway.cli bench --n 20` | 离线 bench（默认 mock） |
+| `python -m model_gateway.cli bench --n 20 --provider deepseek` | 真实 API bench |
+| `pytest` | 单元测试（不联网） |
+| `pytest -m integration` | 集成测试（需 Key） |
+
+bench 报告默认写入 `reports/week01-bench.json`，终端同步打印汇总表。
 
 ## 验收命令（W1 末）
 

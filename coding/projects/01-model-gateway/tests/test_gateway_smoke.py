@@ -18,10 +18,6 @@ def deepseek_config() -> ProviderConfig:
     )
 
 
-# 这是 pytest 的一个标记（marker），用于将 test_gateway_lists_deepseek_when_configured 测试用例打上 abc 标签。
-# 这样可以通过命令行参数（如 pytest -m abc）只运行带有 @pytest.mark.abc 标记的测试用例。
-# 发现参数deepseek_config 会去找同名 @pytest.fixture 装饰的函数。
-@pytest.mark.abc
 def test_gateway_lists_deepseek_when_configured(deepseek_config: ProviderConfig):
     with patch("model_gateway.gateway.load_providers", return_value={"deepseek": deepseek_config}):
         gateway = ModelGateway(provider="deepseek")
