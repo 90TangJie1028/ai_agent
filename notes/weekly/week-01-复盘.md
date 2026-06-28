@@ -42,4 +42,4 @@
 
 - [x] bench --n 20 报告完整（summary + records + meta JSON）
 - [x] 超时/重试/限流有测试（test_retry 4、test_ratelimit 6、test_metrics 等）
-- [ ] git tag `p1-w01`（本地打 tag，需 commit 后执行）
+- [x] git tag `p1-w01`（已 push）
