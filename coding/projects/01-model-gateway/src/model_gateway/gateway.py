@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 
 from model_gateway.adapters.base import ChatAdapter
 from model_gateway.adapters.deepseek import DeepSeekAdapter
@@ -18,8 +19,11 @@ from model_gateway.config import (
     get_gateway_rate_burst,
     load_providers,
 )
+from pydantic import ValidationError
+
 from model_gateway.metrics import CallRecord, GatewayResult
 from model_gateway.ratelimit import RateLimitConfig, TokenBucket
+from model_gateway.schemas import ChatRequest, StructuredAnswer
 
 
 def _default_rate_limiter() -> TokenBucket:
@@ -99,6 +103,49 @@ class ModelGateway:
         record = CallRecord.from_chat_result(chat_result)
         return GatewayResult(result=chat_result, record=record)
 
+    def chat_structured(
+        self,
+        message: str,
+        *,
+        provider: str | None = None,
+        model: str | None = None,
+        timeout: float | None = None,
+        response_model: type[StructuredAnswer] = StructuredAnswer,
+    ) -> GatewayResult:
+        """结构化输出：prompt 约束 JSON → chat → parse → Pydantic 校验。"""
+        name = (provider or self._default_provider).lower()
+        if name in self._providers:
+            model_name = model or self._providers[name].default_model
+        else:
+            model_name = model or "unknown"
+        try:
+            req = ChatRequest(message=message, provider=provider, model=model)
+        except ValidationError as e:
+            record = CallRecord.from_error(provider=name, model=model_name, exc=e)
+            return GatewayResult(result=None, record=record)
+
+        schema_hint = json.dumps(response_model.model_json_schema(), ensure_ascii=False)
+        prompt = (
+            f"{req.message}\n\n"
+            f"请严格按以下 JSON Schema 回复，只输出 JSON，不要 markdown：\n"
+            f"{schema_hint}"
+        )
+
+        gw = self.chat(prompt, provider=req.provider, model=req.model, timeout=timeout)
+        if gw.result is None:
+            return gw
+
+        name = (req.provider or self._default_provider).lower()
+        model_name = model or self._providers[name].default_model
+        try:
+            answer = response_model.model_validate(json.loads(gw.result.content))
+        except (json.JSONDecodeError, ValidationError) as e:
+            record = CallRecord.from_error(provider=name, model=model_name, exc=e)
+            return GatewayResult(result=None, record=record)
+
+        gw.result.content = answer.model_dump_json()
+        return gw
+
     async def async_chat(
         self,
         message: str,
@@ -137,3 +184,4 @@ class ModelGateway:
             for msg in messages
         ]
         return list(await asyncio.gather(*tasks))
+
