@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import asyncio
-import json
+from json import JSONDecodeError
+from typing import Any
 
 from model_gateway.adapters.base import ChatAdapter
 from model_gateway.adapters.deepseek import DeepSeekAdapter
@@ -24,6 +25,12 @@ from pydantic import ValidationError
 from model_gateway.metrics import CallRecord, GatewayResult
 from model_gateway.ratelimit import RateLimitConfig, TokenBucket
 from model_gateway.schemas import ChatRequest, StructuredAnswer
+from model_gateway.structured_output import (
+    StructuredOutputMode,
+    build_response_format,
+    build_structured_prompt,
+    parse_structured_response,
+)
 
 
 def _default_rate_limiter() -> TokenBucket:
@@ -86,6 +93,7 @@ class ModelGateway:
         provider: str | None = None,
         model: str | None = None,
         timeout: float | None = None,
+        response_format: dict[str, Any] | None = None,
     ) -> GatewayResult:
         name = (provider or self._default_provider).lower()
         if name not in self._adapters:
@@ -96,7 +104,12 @@ class ModelGateway:
             )
         model_name = model or self._providers[name].default_model
         try:
-            chat_result = self._adapters[name].chat(message, model=model_name, timeout=timeout)
+            chat_result = self._adapters[name].chat(
+                message,
+                model=model_name,
+                timeout=timeout,
+                response_format=response_format,
+            )
         except Exception as e:
             record = CallRecord.from_error(provider=name, model=model_name, exc=e)
             return GatewayResult(result=None, record=record)
@@ -111,8 +124,9 @@ class ModelGateway:
         model: str | None = None,
         timeout: float | None = None,
         response_model: type[StructuredAnswer] = StructuredAnswer,
+        mode: StructuredOutputMode = "prompt",
     ) -> GatewayResult:
-        """结构化输出：prompt 约束 JSON → chat → parse → Pydantic 校验。"""
+        """结构化输出：按 mode 拼 prompt / response_format → chat → parse → 校验。"""
         name = (provider or self._default_provider).lower()
         if name in self._providers:
             model_name = model or self._providers[name].default_model
@@ -124,22 +138,24 @@ class ModelGateway:
             record = CallRecord.from_error(provider=name, model=model_name, exc=e)
             return GatewayResult(result=None, record=record)
 
-        schema_hint = json.dumps(response_model.model_json_schema(), ensure_ascii=False)
-        prompt = (
-            f"{req.message}\n\n"
-            f"请严格按以下 JSON Schema 回复，只输出 JSON，不要 markdown：\n"
-            f"{schema_hint}"
-        )
+        prompt = build_structured_prompt(req.message, mode, response_model)
+        response_format = build_response_format(mode, response_model)
 
-        gw = self.chat(prompt, provider=req.provider, model=req.model, timeout=timeout)
+        gw = self.chat(
+            prompt,
+            provider=req.provider,
+            model=req.model,
+            timeout=timeout,
+            response_format=response_format,
+        )
         if gw.result is None:
             return gw
 
         name = (req.provider or self._default_provider).lower()
         model_name = model or self._providers[name].default_model
         try:
-            answer = response_model.model_validate(json.loads(gw.result.content))
-        except (json.JSONDecodeError, ValidationError) as e:
+            answer = parse_structured_response(gw.result.content, response_model)
+        except (JSONDecodeError, ValidationError) as e:
             record = CallRecord.from_error(provider=name, model=model_name, exc=e)
             return GatewayResult(result=None, record=record)
 

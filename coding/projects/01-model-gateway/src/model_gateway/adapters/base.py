@@ -10,6 +10,7 @@ from __future__ import annotations
 # dataclass 是 Python 为简化数据类（即主要用于存储数据的类）定义而引入的一个装饰器。其作用是自动为类生成如 __init__、__repr__、__eq__ 等方法，减少样板代码。
 # dataclasses 是包含 dataclass 装饰器以及相关工具函数（如 field、asdict 等）的标准库模块，专门用于数据类的创建和操作。
 from dataclasses import dataclass
+from typing import Any
 
 # 意思是导入 Python 的 typing 模块中的 Protocol 类，用于定义协议（接口）
 # Protocol 类用于定义结构化接口（协议类），允许指定实现类必须拥有哪些方法和属性，但不要求继承，实现“鸭子类型”。
@@ -44,6 +45,7 @@ class ChatAdapter(Protocol):
         *,
         model: str | None = None,
         timeout: float | None = None,
+        response_format: dict[str, Any] | None = None,
     ) -> ChatResult:
         """发送 message 给指定模型，返回 ChatResult 结果"""
         ...

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import time
+from typing import Any
 
 from openai import APITimeoutError, OpenAI
 
@@ -33,6 +34,7 @@ class OpenAICompatAdapter:
         *,
         model: str | None = None,
         timeout: float | None = None,
+        response_format: dict[str, Any] | None = None,
     ) -> ChatResult:
         model_name = model or self._config.default_model
         started = time.perf_counter()
@@ -42,6 +44,7 @@ class OpenAICompatAdapter:
             model_name,
             message,
             timeout=effective_timeout,
+            response_format=response_format,
         )
 
         latency_ms = int((time.perf_counter() - started) * 1000)
@@ -58,16 +61,26 @@ class OpenAICompatAdapter:
             latency_ms=latency_ms,
         )
 
-    def _create_completion(self, model_name: str, message: str, *, timeout: float) -> object:
+    def _create_completion(
+        self,
+        model_name: str,
+        message: str,
+        *,
+        timeout: float,
+        response_format: dict[str, Any] | None = None,
+    ) -> object:
         policy = self._retry_policy
         last_exc: BaseException | None = None
         for attempt in range(policy.max_retries + 1):
             try:
-                return self._client.chat.completions.create(
-                    model=model_name,
-                    messages=[{"role": "user", "content": message}],
-                    timeout=timeout,
-                )
+                kwargs: dict[str, Any] = {
+                    "model": model_name,
+                    "messages": [{"role": "user", "content": message}],
+                    "timeout": timeout,
+                }
+                if response_format is not None:
+                    kwargs["response_format"] = response_format
+                return self._client.chat.completions.create(**kwargs)
             except APITimeoutError as exc:
                 raise TimeoutError(str(exc)) from exc
             except Exception as exc:
