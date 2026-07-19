@@ -1,0 +1,67 @@
+---
+description: 解释概念时用 Cursor Agent 实案 + TS/C++/Java/Lua/Cocos 类比
+alwaysApply: true
+---
+
+# 多语言与 Cursor 实案类比
+
+本规则仅服务于 **ai_agent 学习仓库**（笔记、plan、coding/projects 等）。解释概念或 review 代码时，优先用用户熟悉的技术栈 + **正在用的 Cursor Agent** 做类比，帮助建立直觉。
+
+## 项目边界
+
+- **ai_agent**：当前学习项目，讨论、类比、改代码均限定在此仓库内
+- **公司项目**（如 gee-engine-mobile）：与用户个人学习分离，不要混入 ai_agent 的笔记、规则或实现讨论，除非用户明确切换上下文
+- 多语言类比用**通用语言特性**和 **Cocos2d-x 通用机制**，不引用公司项目里的具体模块、类名或工程约定
+- Cursor 类比只用**用户可感知的产品行为**（Agent / Tools / MCP / Rules / Skills / Mode），不臆造未公开的内部实现细节
+
+## 类比来源（按场景选）
+
+### A. Agent / LLM 产品概念（优先 Cursor）
+
+解释 Function Calling、工具路由、上下文、Agent Loop、HITL、MCP 等时，**优先用 Cursor 当活案例**，再视需要补语言/引擎类比。
+
+| 学习概念 | Cursor 实案（用户每天在用） |
+|:---|:---|
+| 工具目录 `tools[]` | Agent 内置工具 + 已启用的 MCP；聊天顶栏可开关工具 |
+| 模型选工具 / FC | Agent 根据你的问题决定调 Shell / Grep / 读文件等 |
+| 本地执行 handler | Cursor/IDE/MCP Server 真正执行，模型只「宣告要调」 |
+| `role=tool` 回灌 | 工具结果出现在对话里，模型据此继续写/改 |
+| 工具集过大 / token | MCP 不宜开太多；Skills 摘要在线、全文按需；Mode 裁剪能力 |
+| 规则路由 | Ask vs Agent vs Plan；Rules 的 Always / globs / 智能应用 |
+| 按需加载 | Skills：先看到描述，相关再读完整 `SKILL.md` |
+| 无合适工具 | 直接答 / Web Search / 问你 / 提示装 MCP |
+| HITL / 审批 | 跑终端、MCP 前常要你点允许 |
+| Subagent | Task 子代理：探索/审查等带更窄工具集 |
+| 校验参数 | 工具 schema；你仓库里的 Pydantic `validate_args` 同理 |
+
+写法：先讲当前代码/协议在做什么 → 一句「就像你在 Cursor 里……」→ 再点差异（例如 Cursor 产品层封装了多轮，P1 要自己写 `chat_with_tools`）。
+
+### B. 语言 / 引擎机制（原优先级）
+
+解释类型、容器、装饰器、异步等**编程机制**时，仍用：
+
+1. **TypeScript** — 泛型、装饰器、const/readonly、Set/Map、async
+2. **C++** — 模板、constexpr、const、STL 容器、RAII、using
+3. **Java** — 接口/抽象类、泛型、final、集合框架、注解
+4. **Lua** — table 作 map/set、元表、闭包、协程
+5. **Cocos2d-x** — 节点树/组件、事件分发、调度器、资源缓存、状态机
+
+Agent 概念若 Cursor 对不上，再用 Cocos（如事件名分发 ≈ tool name → handler）。
+
+## 写法要求
+
+- 先说明 Python/当前代码在**做什么**，再给类比；不强行一一对应
+- 类比要**贴切**：类型对类型，工具目录对工具目录，事件分发对 tool 分发
+- 常见误类比要指出（如 Python `frozenset` ≠ TS `const enum`，更像 `Set` / Java `Set.of`）
+- 每条类比一句话点出**差异**（编译期 vs 运行时；Cursor 产品封装 vs 本仓库手写闭环）
+- 不要把 Cursor 说成「唯一正确实现」；它是**可对照的生产级 Agent**，P1/学习代码可以更小、更裸
+
+## 简表（语言速查）
+
+| Python 概念 | TS | C++ | Java | Lua |
+|-------------|----|----|------|-----|
+| `TypeVar` | 泛型 `<T>` | `template<typename T>` | `<T>` | 无静态泛型，运行时类型 |
+| `ParamSpec` | `F extends (...args)=>any` | 保留 `decltype` 签名 | 方法句柄 + 泛型 | 可变参数 `...` |
+| `frozenset` + `in` | `Set` + `.has()` | `unordered_set` + `.count()` | `Set.of()` + `.contains()` | `{[k]=true}` 查表 |
+| `@decorator` | 高阶函数包装 | 包装 lambda/模板 | 注解 + AOP | 闭包包装函数 |
+| `dataclass` | interface + 默认值 | struct + 默认成员 | record / POJO | table 当对象 |

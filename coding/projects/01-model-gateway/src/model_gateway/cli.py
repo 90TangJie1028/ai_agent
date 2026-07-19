@@ -18,8 +18,11 @@ import typer  # noqa
 
 from model_gateway.bench import format_summary_table, run_bench
 from model_gateway.gateway import ModelGateway
+from model_gateway.tools.calculator import build_default_registry
 
 app = typer.Typer(help="P1 Model Gateway CLI — 默认 DeepSeek")
+tools_app = typer.Typer(help="Function Calling 工具命令")
+app.add_typer(tools_app, name="tools")
 
 
 # 这个装饰器将下面的函数注册为 CLI 的一个子命令，
@@ -105,5 +108,45 @@ def bench(
             )
 
 
+@tools_app.command("calc")
+def tools_calc(
+    expression: str = typer.Argument(..., help='算式，如 "123 * 456" 或整句 "请计算 1+2"'),
+    provider: str | None = typer.Option(
+        None,
+        help="deepseek / mock / ...；默认走 .env DEFAULT_PROVIDER",
+    ),
+    model: str | None = typer.Option(None, help="覆盖默认模型名"),
+):
+    """用 calculator 工具做 Function Calling 闭环（默认可走 mock 离线验证）。"""
+    # 若参数本身就是纯算式，包成自然语言，方便模型/mock 识别
+    message = expression
+    if expression.strip() and expression.strip()[0].isdigit():
+        message = f"请计算 {expression}"
+
+    gateway = ModelGateway(provider=provider) if provider else ModelGateway()
+    gw = gateway.chat_with_tools(
+        message,
+        registry=build_default_registry(),
+        provider=provider,
+        model=model,
+    )
+    record = gw.record
+    if gw.result is None:
+        typer.echo(f"调用失败: {record.error_type}", err=True)
+        raise typer.Exit(code=1)
+
+    result = gw.result
+    typer.echo(result.content)
+    typer.echo(
+        f"\n[{result.provider}/{result.model}] "
+        f"tokens={record.total_tokens} "
+        f"(prompt={record.prompt_tokens}, completion={record.completion_tokens}) "
+        f"latency={record.latency_ms}ms cost=${record.cost_usd:.6f} "
+        f"finish={result.finish_reason}",
+        err=True,
+    )
+
+
 if __name__ == "__main__":
     app()
+

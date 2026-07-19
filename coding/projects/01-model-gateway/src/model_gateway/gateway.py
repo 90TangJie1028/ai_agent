@@ -22,7 +22,8 @@ from model_gateway.config import (
 )
 from pydantic import ValidationError
 
-from model_gateway.metrics import CallRecord, GatewayResult
+from model_gateway.adapters.base import ChatResult
+from model_gateway.metrics import CallRecord, GatewayResult, compute_cost_usd
 from model_gateway.ratelimit import RateLimitConfig, TokenBucket
 from model_gateway.schemas import ChatRequest, StructuredAnswer
 from model_gateway.structured_output import (
@@ -31,6 +32,8 @@ from model_gateway.structured_output import (
     build_structured_prompt,
     parse_structured_response,
 )
+from model_gateway.tools.calculator import build_default_registry
+from model_gateway.tools.registry import ToolRegistry
 
 
 def _default_rate_limiter() -> TokenBucket:
@@ -162,6 +165,87 @@ class ModelGateway:
         gw.result.content = answer.model_dump_json()
         return gw
 
+    def chat_with_tools(
+        self,
+        message: str,
+        *,
+        registry: ToolRegistry | None = None,
+        provider: str | None = None,
+        model: str | None = None,
+        timeout: float | None = None,
+        max_tool_rounds: int = 1,
+    ) -> GatewayResult:
+        """Function Calling 闭环：带 tools → 本地执行 → 回灌 → 最终答案。
+
+        类似 Cursor Agent：模型只声明调哪个工具；真正执行在本地（Registry handler）。
+        D11 默认最多 1 轮工具调用（够 calculator E2E）。
+        """
+        name = (provider or self._default_provider).lower()
+        if name not in self._adapters:
+            configured = ", ".join(self.available_providers) or "无"
+            raise ValueError(
+                f"未配置 provider={name!r}。请在 .env 填入对应 API Key。"
+                f" 当前可用: {configured}"
+            )
+        model_name = model or self._providers[name].default_model
+        reg = registry or build_default_registry()
+        tools = reg.to_openai_tools()
+        messages: list[dict[str, Any]] = [{"role": "user", "content": message}]
+        adapter = self._adapters[name]
+        rounds: list[ChatResult] = []
+
+        try:
+            for _ in range(max_tool_rounds + 1):
+                chat_result = adapter.chat_messages(
+                    messages,
+                    model=model_name,
+                    timeout=timeout,
+                    tools=tools,
+                )
+                rounds.append(chat_result)
+
+                if not chat_result.tool_calls:
+                    return GatewayResult(
+                        result=chat_result,
+                        record=_record_from_rounds(rounds),
+                    )
+
+                if len(rounds) > max_tool_rounds:
+                    # 仍要调工具但轮次用尽：返回当前结果（通常 content 为空）
+                    return GatewayResult(
+                        result=chat_result,
+                        record=_record_from_rounds(rounds),
+                    )
+
+                messages.append(chat_result.to_assistant_message())
+                for tc in chat_result.tool_calls:
+                    try:
+                        tool_out = reg.call(tc.name, tc.arguments)
+                        tool_content = str(tool_out)
+                    except Exception as exc:  # ValidationError / 未知工具 / 求值失败
+                        tool_content = f"error: {type(exc).__name__}: {exc}"
+                    messages.append(
+                        {
+                            "role": "tool",
+                            "tool_call_id": tc.id,
+                            "content": tool_content,
+                        }
+                    )
+        except Exception as e:
+            record = CallRecord.from_error(provider=name, model=model_name, exc=e)
+            return GatewayResult(result=None, record=record)
+
+        # 理论上不会走到这里
+        last = rounds[-1] if rounds else None
+        if last is None:
+            record = CallRecord.from_error(
+                provider=name,
+                model=model_name,
+                exc=RuntimeError("chat_with_tools produced no rounds"),
+            )
+            return GatewayResult(result=None, record=record)
+        return GatewayResult(result=last, record=_record_from_rounds(rounds))
+
     async def async_chat(
         self,
         message: str,
@@ -200,4 +284,23 @@ class ModelGateway:
             for msg in messages
         ]
         return list(await asyncio.gather(*tasks))
+
+
+def _record_from_rounds(rounds: list[ChatResult]) -> CallRecord:
+    """把多轮 API 调用的 token / 延迟累加进一条 CallRecord。"""
+    last = rounds[-1]
+    prompt = sum(r.prompt_tokens for r in rounds)
+    completion = sum(r.completion_tokens for r in rounds)
+    total = sum(r.total_tokens for r in rounds)
+    latency = sum(r.latency_ms for r in rounds)
+    return CallRecord(
+        provider=last.provider,
+        model=last.model,
+        prompt_tokens=prompt,
+        completion_tokens=completion,
+        total_tokens=total,
+        latency_ms=latency,
+        cost_usd=compute_cost_usd(last.model, prompt, completion),
+        success=True,
+    )
 

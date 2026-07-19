@@ -33,12 +33,14 @@
 
 ---
 
-## D11 · 周四 07-02 · 计算器工具端到端
+## D11 · 周四 07-02 · 计算器工具端到端 ✅
 
 | 学习 30m | Function Calling 消息格式；DeepSeek tool_calls 字段 |
 | 编码 120m | `tools/calculator.py`；`gateway.chat_with_tools()` 闭环（默认 DeepSeek） |
 | 测试 45m | 「123 * 456」工具调用 E2E |
 | 文档 30m | 更新 P1 README CLI：`tools calc` |
+
+**产物**：`calculator.py` + `chat_with_tools` + `scripts/d11_chat_with_tools_debug.py`；笔记 `07-Function-Calling消息格式.md`
 
 ---
 

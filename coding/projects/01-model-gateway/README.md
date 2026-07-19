@@ -25,7 +25,8 @@ src/model_gateway/
   metrics.py
   schemas.py
   tools/registry.py
-  cli.py
+  tools/calculator.py
+  cli.py                 # chat / providers / bench / tools calc
 tests/
 ```
 
@@ -55,6 +56,8 @@ DEFAULT_MODEL=deepseek-chat
 |------|------|
 | `python -m model_gateway.cli providers` | 列出已配置 provider |
 | `python -m model_gateway.cli chat "你好"` | 单次对话（默认 deepseek，无 Key 时可用 mock） |
+| `python -m model_gateway.cli tools calc "123 * 456" --provider mock` | 计算器 FC 闭环（离线） |
+| `python -m model_gateway.cli tools calc "123 * 456"` | 计算器 FC（默认 provider，需 Key） |
 | `python -m model_gateway.cli bench --n 20` | 离线 bench（默认 mock） |
 | `python -m model_gateway.cli bench --n 20 --provider deepseek` | 真实 API bench |
 | `pytest` | 单元测试（不联网） |

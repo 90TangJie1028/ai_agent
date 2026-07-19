@@ -7,7 +7,7 @@ from typing import Any
 
 from openai import APITimeoutError, OpenAI
 
-from model_gateway.adapters.base import ChatResult
+from model_gateway.adapters.base import ChatResult, ToolCall
 from model_gateway.config import ProviderConfig, get_gateway_timeout
 from model_gateway.retry import RetryPolicy, backoff_delay, is_retryable
 
@@ -36,48 +36,72 @@ class OpenAICompatAdapter:
         timeout: float | None = None,
         response_format: dict[str, Any] | None = None,
     ) -> ChatResult:
+        return self.chat_messages(
+            [{"role": "user", "content": message}],
+            model=model,
+            timeout=timeout,
+            response_format=response_format,
+        )
+
+    def chat_messages(
+        self,
+        messages: list[dict[str, Any]],
+        *,
+        model: str | None = None,
+        timeout: float | None = None,
+        tools: list[dict[str, Any]] | None = None,
+        response_format: dict[str, Any] | None = None,
+    ) -> ChatResult:
         model_name = model or self._config.default_model
         started = time.perf_counter()
         effective_timeout = timeout if timeout is not None else self._timeout
 
         response = self._create_completion(
             model_name,
-            message,
+            messages,
             timeout=effective_timeout,
+            tools=tools,
             response_format=response_format,
         )
 
         latency_ms = int((time.perf_counter() - started) * 1000)
-        choice = response.choices[0].message
+        choice = response.choices[0]
+        message = choice.message
         usage = response.usage
+        tool_calls = _parse_tool_calls(message)
 
         return ChatResult(
-            content=choice.content or "",
+            content=message.content or "",
             model=response.model or model_name,
             provider=self.provider,
             prompt_tokens=usage.prompt_tokens if usage else 0,
             completion_tokens=usage.completion_tokens if usage else 0,
             total_tokens=usage.total_tokens if usage else 0,
             latency_ms=latency_ms,
+            tool_calls=tool_calls,
+            finish_reason=getattr(choice, "finish_reason", None),
         )
 
     def _create_completion(
         self,
         model_name: str,
-        message: str,
+        messages: list[dict[str, Any]],
         *,
         timeout: float,
+        tools: list[dict[str, Any]] | None = None,
         response_format: dict[str, Any] | None = None,
-    ) -> object:
+    ) -> Any:
         policy = self._retry_policy
         last_exc: BaseException | None = None
         for attempt in range(policy.max_retries + 1):
             try:
                 kwargs: dict[str, Any] = {
                     "model": model_name,
-                    "messages": [{"role": "user", "content": message}],
+                    "messages": messages,
                     "timeout": timeout,
                 }
+                if tools is not None:
+                    kwargs["tools"] = tools
                 if response_format is not None:
                     kwargs["response_format"] = response_format
                 return self._client.chat.completions.create(**kwargs)
@@ -90,3 +114,20 @@ class OpenAICompatAdapter:
                 time.sleep(backoff_delay(attempt, policy))
         assert last_exc is not None
         raise last_exc
+
+
+def _parse_tool_calls(message: Any) -> list[ToolCall]:
+    raw = getattr(message, "tool_calls", None) or ()
+    out: list[ToolCall] = []
+    for item in raw:
+        fn = getattr(item, "function", None)
+        if fn is None:
+            continue
+        out.append(
+            ToolCall(
+                id=str(getattr(item, "id", "") or ""),
+                name=str(getattr(fn, "name", "") or ""),
+                arguments=str(getattr(fn, "arguments", None) or "{}"),
+            )
+        )
+    return out
