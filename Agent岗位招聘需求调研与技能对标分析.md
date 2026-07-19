@@ -1,318 +1,314 @@
 # Agent 岗位招聘需求调研与技能对标分析
 
-**版本日期**：2026-06-22  
-**调研范围**：Boss 直聘、智联招聘、猎聘、大厂官方 JD；辅以掘金/CSDN 等对 50+ 真实 JD 的二次分析  
+**版本日期**：2026-07-17（相对 2026-06-22 版的季度复盘）  
+**调研范围**：猎聘/智联等公开 JD、海外 Applied AI / Agent 岗 JD、框架招聘统计（约 1100 条 agentic 岗位样本）、面试题库与后端转型路线（JavaGuide 等）交叉验证  
 **对标文档**：[Agent中级开发工程师学习计划（终极攻略版）.md](./Agent中级开发工程师学习计划（终极攻略版）.md)  
-**目标读者**：有 10 年+ 工程经验、计划 4–5 个月转向 Agent/LLM 应用工程的中级开发者
+**目标读者**：10 年+ 工程经验、4–5 个月转向 Agent/LLM **应用工程** 的开发者  
+**核心问题**：时间最贵时，市场究竟为哪些技能付钱？哪些该学深、哪些该砍？
 
 ---
 
-## 1. 调研方法与样本说明
+## 1. 执行摘要（先读这段再决定学什么）
 
-### 1.1 数据来源
+### 1.1 三句结论
 
-| 来源 | 样本类型 | 参考价值 |
+1. **赛道没变**：Agent 应用工程师 / LLM 应用工程师仍是主战场；训练/微调算法是另一条赛道，不要混投。  
+2. **门槛变硬的是「生产可靠性」**：MCP、LangGraph 状态编排、可评测 RAG、观测与成本、HITL —— 不是又学一个新框架名。  
+3. **最高 ROI 学习策略**：一个旗舰项目贯穿 + 先手写 Agent Loop 再上 LangGraph + MCP Server 必做 + golden set（含工具轨迹）必做；CrewAI/AutoGen/重前端/微调主线全部降级。
+
+### 1.2 相对 2026-06 调研的变化
+
+| 变化 | 方向 | 对学习计划的影响 |
 |---|---|---|
-| 智联招聘 | 联想教育、中创智维、蓬勃科技、保利和润等 Agent 岗 JD 原文 | 中型公司、交付型岗位，技能描述完整 |
-| 猎聘 | 腾讯 PCG、字节 Coze/开发者服务/AI for Science、湃方科技等 | 大厂与高薪岗，工程化要求最高 |
-| Boss 直聘 | 通过掘金数据分析文章间接采样（50+ JD） | 关键词频率、岗位趋势 |
-| 行业分析 | CSDN《2026 大厂 Agent 面试风向标》、AgentGuide 招聘分析 | 面试考点与 JD 趋势交叉验证 |
+| MCP | 加分 → 大量 JD 硬性/半硬性 | 保持 P0，强调「接企业系统」叙事 |
+| Context Engineering | 从概念 → 独立岗与 JD 措辞 | 用它替代空泛「Prompt 优化」叙事 |
+| Agentic RAG / 高级 RAG | JD 出现增多 | RAG 周加一小段，不另开阶段 |
+| Agent 评测 | 从「有评测」→ 轨迹/工具序列/状态转移 | 第 13 周加 trajectory 断言 |
+| 多 Agent | 出现率上升 | 轻量 supervisor demo，主线仍单 Agent |
+| 一等公民 SDK（Claude/OpenAI Agents） | 上升 | 对照了解，不换 LangGraph 主线 |
+| A2A | 课程/平台岗增多 | P2 概念级 |
+| AutoGen | 招聘滞后、产品偏维护 | 了解即可，勿押主线 |
+| AI Coding（Cursor 等） | 更多 JD 显性要求 | 日常使用即可写进简历 |
+| 垂直场景（ChatBI/合同/差旅） | 增多 | 旗舰可加 1 个垂直切片，不换项目 |
 
-### 1.2 岗位名称归一化
+### 1.3 给你个人的投产比判断
 
-招聘市场上的名称很杂，本报告统一归为以下四类：
+你有长期工程经验 → **不要从「AI 小白课程」重走**。市场真正缺的是：
 
-| 类型 | 常见 JD 标题 | 占比体感 | 与你学习计划的匹配度 |
+> 能把非确定性模型输出，做成有权限、有状态、有评测、有成本账、出了问题能定位的服务的人。
+
+这与你过往的 API / 稳定性 / 排障能力同构。缺的是 Agent/RAG/MCP 这一层的 **可证明作品**，不是再刷一年基础语法。
+
+---
+
+## 2. 调研方法与样本
+
+| 来源类型 | 样本/材料 | 用途 |
+|---|---|---|
+| 国内 JD | 猎聘/智联：智能体应用开发、大模型应用、MCP/Skill、携程 Agent、资管 Agent、南昌/杭州等岗 | 关键词频率与职责表述 |
+| 海外 JD / 角色定义 | Applied AI Engineer、Appian MCP 岗、Anthropic 系 Applied AI 能力描述 | 验证「评测=核心竞争力」 |
+| 招聘统计 | agentic-engineering-jobs 对 1135 条岗位中框架共现分析（2026 春末采样窗） | 框架与 MCP 共现客观数据 |
+| 面试题库 | 卡码笔记、面灵、博客园 Agent 面试梳理、大厂风向标类文章 | 校准「JD 一行、面试挖三层」的点 |
+| 转型路线 | JavaGuide 后端→Agent（2026-06） | 工程背景转型节奏交叉验证 |
+| 作品集建议 | Technovids 等 2026 AI Engineer Projects | 高信号项目形态 |
+
+说明：公开招聘文案有水分（「精通一切」），本报告用 **多源交叉** —— 只把「JD + 面试题 + 框架招聘统计」同时出现的技能标为 P0。
+
+---
+
+## 3. 岗位地图：你该站哪一格
+
+| 类型 | 常见标题 | 匹配度 | 策略 |
 |---|---|---|---|
-| **A. Agent 应用工程师** | AI Agent 开发工程师、智能体开发工程师、大模型应用工程师 | ~45% | ★★★★★ 主目标 |
-| **B. Agent 平台工程师** | Agent 平台工程师、AI 应用平台开发、Dify 二次开发 | ~25% | ★★★★☆ 你的旗舰项目可向上靠 |
-| **C. 全栈 Agent 工程师** | AI 全栈工程师、Python 全栈（Agent 方向） | ~20% | ★★★☆☆ 需补轻量前端 |
-| **D. 算法偏重型** | 大模型算法工程师（含 Agent）、AI 算法开发 | ~10% | ★★☆☆☆ 非主路线，慎投 |
+| **A. Agent 应用工程师** | AI Agent / 智能体开发 / 大模型应用 | ★★★★★ | **主投** |
+| **B. RAG / LLM 应用** | RAG 工程师、知识库、AI 后端 | ★★★★★ | 主投；旗舰天然覆盖 |
+| **C. Agent 平台** | MCP/Skill、工具平台、AI 中台 | ★★★★☆ | 旗舰含 MCP+评测+Skills 时可投 |
+| **D. 全栈 Agent** | AI 全栈、轻前端 | ★★★☆☆ | 有 CLI/轻 Web 即可，不补重前端 |
+| **E. 算法偏重** | 训练/微调/RL/顶会 | ★☆☆☆☆ | **不投**（除非你另有 paper 路径） |
+| **F. Context Engineering** | 上下文/本体/语义层工程师 | ★★★☆☆ | 加分叙事；主项目偏 Agent 时作副线表达 |
 
-**结论**：你的原计划定位（Agent 应用工程师 / LLM 应用工程师）与市场需求主体一致，方向正确。需要补的是 **MCP、LangChain 生态显性覆盖、低代码平台认知、国内大模型适配** 等 JD 高频但原计划偏弱的项。
-
----
-
-## 2. 技能需求频率矩阵（过滤后）
-
-以下按 **出现频率** 和 **面试权重** 综合排序，★ 为必备，☆ 为加分。
-
-### 2.1 编程与后端基础
-
-| 技能 | 频率 | 典型 JD 表述 | 原计划覆盖 | 缺口 |
-|---|---|---|---|---|
-| **Python** | ★★★★★ | 精通 Python，扎实软件工程基础 | ✅ 主语言 | 补 asyncio 异步编程实战 |
-| **FastAPI** | ★★★★☆ | RESTful API、异步服务 | ✅ 已列 | 无 |
-| Django/Flask | ★★★☆☆ | 熟悉其一即可 | ⚠️ 未列 | 了解即可，不必深学 |
-| **Pydantic / JSON Schema** | ★★★★☆ | 工具参数 Schema、结构化输出 | ✅ 已列 | 无 |
-| Go/Java 第二语言 | ★★★☆☆ | 大厂/平台岗常见 | ❌ 未列 | 非 18 周主线，简历可写“可快速适配” |
-| 微服务 / 高并发 | ★★★★☆ | 3–5 年经验岗标配 | ⚠️ 弱 | 旗舰项目加队列/限流即可 |
-| 消息队列 Kafka/RabbitMQ | ★★★☆☆ | 异步长任务、Agent 平台岗 | ❌ 未列 | 第 13–14 周可选加 Redis Stream 或 Celery |
-
-### 2.2 Agent 核心能力
-
-| 技能 | 频率 | 典型 JD 表述 | 原计划覆盖 | 缺口 |
-|---|---|---|---|---|
-| **ReAct / Agent Loop** | ★★★★★ | 手写或理解 Think-Act-Observe | ✅ 第 6 周 | 无 |
-| **Function Calling / Tool Use** | ★★★★★ | 工具注册、参数校验、执行器 | ✅ 已列 | 无 |
-| **MCP（模型上下文协议）** | ★★★★★↑ | 2026 从加分项变硬性条件 | ❌ **重大缺口** | **必须新增专项** |
-| **LangGraph** | ★★★★★ | 状态机、中断恢复、DAG 编排 | ✅ 已列 | 无 |
-| **LangChain** | ★★★★★ | 生态组件、LCEL、Chain | ⚠️ 仅间接 | **需显性列入主栈** |
-| Plan-and-Execute | ★★★★☆ | 任务拆解、规划执行 | ✅ 项目含 Planner | 面试要能画图讲 |
-| **记忆系统** | ★★★★☆ | 短期/长期记忆、上下文管理 | ⚠️ 弱 | 需补 Memory 模块 |
-| Multi-Agent | ★★★★☆ | AutoGen/CrewAI/多 Agent 协作 | ⚠️ CrewAI 了解即可 | 补“何时不用多 Agent”案例 |
-| **Skills 规范** | ★★★★☆↑ | 字节/联想等 2026 新热点 | ❌ 未列 | 与 MCP 一起学习 |
-| A2A 协议 | ★★★☆☆ | Agent 间协作 | ❌ 未列 | 了解概念即可 |
-| Dify / Coze | ★★★★☆ | 低代码平台、快速交付 | ❌ 未列 | 1 周体验级覆盖 |
-| AutoGen | ★★★☆☆ | 多 Agent 对话协作 | ❌ 未列 | 文档级了解 |
-
-### 2.3 RAG 与知识库
-
-| 技能 | 频率 | 典型 JD 表述 | 原计划覆盖 | 缺口 |
-|---|---|---|---|---|
-| **RAG 全流程** | ★★★★★ | 摄取、分块、索引、检索、生成 | ✅ 第 3–5 周 | 无 |
-| **混合检索 + Rerank** | ★★★★★ | BM25+向量、重排序 | ✅ 已列 | 无 |
-| **引用溯源 / 拒答** | ★★★★☆ | 企业级可信问答 | ✅ 已列 | 无 |
-| 向量库 Milvus/Qdrant/pgvector | ★★★★☆ | 至少熟练一种 | ✅ Chroma 起步 | 建议 MVP 阶段切 pgvector |
-| ES 混合检索 | ★★★☆☆ | Milvus+ES 双路 | ❌ 未列 | 简历可写“了解 ES 混合检索方案” |
-| GraphRAG / 知识图谱 | ★★★☆☆ | 多跳推理、复杂关联 | ❌ 未列 | 了解概念 + 1 个 demo 阅读 |
-| 评测 RAGAs/DeepEval | ★★★★☆ | 离线评测、指标驱动优化 | ✅ golden dataset | 可引入 RAGAs 库 |
-| ACL/RBAC 权限过滤 | ★★★☆☆ | 企业知识库 | ⚠️ 弱 | 旗舰项目加文档级权限即可 |
-
-### 2.4 模型与 Prompt
-
-| 技能 | 频率 | 典型 JD 表述 | 原计划覆盖 | 缺口 |
-|---|---|---|---|---|
-| **Prompt Engineering** | ★★★★★ | CoT、Few-shot、模板化 | ⚠️ 分散 | 集中 2–3 天整理 Prompt 库 |
-| **多模型接入与路由** | ★★★★☆ | GPT/Claude/DeepSeek/通义/文心 | ⚠️ 偏 OpenAI | **加国内模型适配器** |
-| Structured Output | ★★★★☆ | JSON Schema 约束输出 | ✅ 第 2 周 | 无 |
-| Embedding 选型与调优 | ★★★★☆ | 维度、中英文、领域适配 | ⚠️ 弱 | RAG 周补充对比实验 |
-| 模型微调 LoRA/PEFT | ★★★☆☆ | 算法偏重型岗 | ❌ 未列 | 非主线，知道原理即可 |
-| vLLM / 私有化部署 | ★★★☆☆ | 推理优化、本地部署 | ❌ 未列 | 了解 Ollama/vLLM 概念 |
-
-### 2.5 工程化与运维
-
-| 技能 | 频率 | 典型 JD 表述 | 原计划覆盖 | 缺口 |
-|---|---|---|---|---|
-| **Docker / Docker Compose** | ★★★★★ | 容器化部署 | ✅ 已列 | 无 |
-| **评测与可观测** | ★★★★★ | Tracing、成本、成功率 | ✅ LangSmith/Langfuse | 无 |
-| Kubernetes | ★★★★☆ | 3–5 年平台岗 | ❌ 未列 | 面试了解概念，不纳入 18 周主线 |
-| CI/CD + 回归测试 | ★★★★☆ | smoke test、eval subset | ✅ 第 13 周 | 无 |
-| 熔断/降级/限流/幂等 | ★★★★☆ | 生产级 Agent 平台 | ✅ Model Gateway | 无 |
-| Redis | ★★★★☆ | 缓存、会话、队列 | ✅ 已列 | 无 |
-| PostgreSQL | ★★★★☆ | 业务数据 + pgvector | ✅ 已列 | 无 |
-| **AI Coding 工具** | ★★★★☆↑ | Cursor/Copilot 提效 | ❌ 未列 | 日常开发默认使用即可 |
-
-### 2.6 软技能与简历信号
-
-| 信号 | 频率 | 说明 |
-|---|---|---|
-| **0→1 完整项目** | ★★★★★ | 能演示、能讲架构、有 GitHub |
-| **量化指标** | ★★★★★ | 检索命中率、工具成功率、P95 延迟、成本 |
-| **行业落地经验** | ★★★★☆ | 金融/制造/政务/教育等垂直场景 |
-| 开源贡献 | ★★★☆☆ | 加分但非必须 |
-| 英语读写 | ★★★☆☆ | 外企/全球化团队岗 |
-| 全栈（React/Vue） | ★★★☆☆ | 部分岗要求轻量管理后台 |
+北美市场另有 FDE / Applied AI / Agent Platform 等收敛岗位，共性仍是：**Python、工具调用、RAG、eval、MCP、生产可靠性**。薪资带与国内不可直接换算，但技能清单高度同构。
 
 ---
 
-## 3. 典型 JD 原文摘要（代表性样本）
+## 4. 技能需求频率矩阵（2026-07）
 
-### 3.1 大厂应用型 — 腾讯 PCG Agent 工程师（猎聘，30–60k）
+★ = 必备频率/面试权重；↑ = 相对 6 月上升。
 
-**核心要求摘录**：
-- Go/Python 高并发 Agent 服务、工作流引擎、队列消费
-- LangChain/LangGraph/LlamaIndex/AutoGen/Eino/Dify/Coze 至少一种
-- Function Calling、Tool Use、**MCP**、ReAct、Plan-and-Execute、**Skills**
-- 单测、CI/CD、可观测性（日志、Trace、Metrics）
-- 有完整 Agent 落地项目，可附 Demo/GitHub
+### 4.1 编程与后端
 
-**对你的启示**：大厂不只看框架名称，看 **工程化全套**。你的 18 周计划在评测、trace、CI 上与大厂方向一致；需补 **MCP + Skills**。
-
-### 3.2 大厂平台型 — 字节跳动开发者服务 Agent 研发（猎聘，30–60k）
-
-**核心要求摘录**：
-- 模型接入、Agent 开发、RAG 优化、**MCP 及工具开发**
-- 评估系统、上下文工程
-- 从 0–1 搭建 Agent 应用经验
-- 服务化、异步、高可用、监控容灾
-
-**对你的启示**：字节系特别强调 **MCP、工具生态、评估系统**，与“测试开发-开发者 AI”岗一样，把 Agent 可靠性当硬指标。
-
-### 3.3 交付型中型公司 — 联想教育 AI Agent 工程师（智联，25–35k）
-
-**核心要求摘录**：
-- LangChain/LangGraph、DAG/状态机、多 Agent、会话与长任务
-- **Skills 注册**、MCP、工具 Schema、租户隔离、鉴权、幂等/重试/限流/熔断
-- 企业级 RAG：混合检索 Milvus+ES、重排、引用溯源、ACL
-- 全栈 Python+React、K8s/Docker、离线评测 + 线上指标
-- 解决幻觉、死循环、上下文丢失等行业共性问题
-
-**对你的启示**：这是与你目标最贴近的 JD 之一。你的旗舰项目模块划分与这份 JD **高度同构**，补齐 MCP/Skills/混合检索即可直接对标。
-
-### 3.4 行业集成型 — 中创智维 AI 大模型应用及 Agent 工程师（智联）
-
-**核心要求摘录**：
-- 至少 2 年 LangChain 经验，LangGraph/langFlow
-- RAG 全流程、向量数据库、与行业业务融合
-- 系统运维、客户系统集成
-- 学历/年限门槛较高（985/3 年+）
-
-**对你的启示**：集成型公司看重 **LangChain 生态熟练度 + 行业话术**。面试时要能把你的旗舰项目翻译成“某行业知识工作台”。
-
-### 3.5 创业型 — 蓬勃科技 AI Agent 开发工程师（智联）
-
-**核心要求摘录**：
-- 5 年+ 后端，2 年+ Agent 商业化经验
-- LangChain/LlamaIndex、LangGraph 状态机
-- Milvus/Chroma、GPT/文心/通义等多模型
-- Docker/K8s、Kafka/RabbitMQ、Dify 二次开发加分
-
-**对你的启示**：创业公司对 **商业化交付、多模型、消息队列** 敏感。你的项目应展示“可卖给客户”的完整度。
-
----
-
-## 4. 2026 面试高频考点（JD 之外但决定通过率）
-
-来自大厂面试面经归纳，以下问题在 JD 里常常只写一行，但面试会深挖：
-
-| 考点 | 面试官真正想听的 | 你的准备动作 |
-|---|---|---|
-| Agent vs Chatbot | 自主决策 + 工具行动闭环 | 用旗舰项目 1 分钟版回答 |
-| Agentic Loop | Think→Act→Observe，消息格式 | 第 6 周手写 loop 时画序列图 |
-| 工具死循环 | 三层防御：工具层/推理层/规划层 | 第 8 周安全周写进代码 |
-| MCP vs Function Calling | 动态发现、Server-First、可复用资产 | **新增 MCP 专项** |
-| RAG 检索差怎么办 | 分块、混合检索、rerank、query 改写 | 第 4–5 周留 badcase 库 |
-| 记忆方案 | 工作/短期/长期记忆，检索式 vs 权重式 | 第 7 周 LangGraph 加 Memory |
-| 多 Agent 何时用 | 子任务隔离 vs 需要通信 | 准备“为什么单 Agent”论据 |
-| 成本优化 | 模型路由、缓存、Token 预算、KV cache | 第 14 周观测周 |
-| Prompt Injection | MCP Context Poisoning、工具描述审计 | 第 8/15 周安全报告 |
-
----
-
-## 5. 与原学习计划的差距分析
-
-### 5.1 原计划做对了什么（与市场需求高度一致）
-
-1. **工程化优先，非算法研究** — 与 80%+ JD 方向一致  
-2. **旗舰项目贯穿** — 对标“0→1 完整系统”硬要求  
-3. **RAG 可评测化** — 企业级 JD 反复强调离线评测  
-4. **LangGraph 状态编排** — 2026 最热框架之一  
-5. **安全与人工审批** — 大厂面试高频  
-6. **trace + 成本 + 部署** — 平台型 JD 标配  
-
-### 5.2 必须补充的缺口（按优先级）
-
-| 优先级 | 缺口 | 建议动作 | 建议插入周次 |
+| 技能 | 频率 | 原计划 | 结论 |
 |---|---|---|---|
-| **P0** | MCP 协议与 Server 开发 | 为旗舰项目加 MCP Server，暴露 kb/agent 工具 | 第 7–8 周 |
-| **P0** | LangChain 生态显性覆盖 | 主栈表加入 LangChain；用 LCEL 做 RAG 管线 | 第 3 周起 |
-| **P1** | 国内大模型适配 | ModelGateway 加 DeepSeek/通义/智谱适配器 | 第 1–2 周 |
-| **P1** | 记忆系统 | LangGraph Checkpointer + 长期记忆检索 | 第 7 周 |
-| **P1** | Skills 规范 | 工具模块化注册，版本化，文档化 | 第 8 周 |
-| **P2** | Dify/Coze 体验 | 2 天搭建同款 RAG/Agent，写对比 ADR | 第 12 周末 |
-| **P2** | pgvector 生产化 | MVP 阶段从 Chroma 迁 pgvector | 第 10 周 |
-| **P2** | AI Coding 工具 | 日常用 Cursor，简历写提效实践 | 全程 |
-| **P3** | GraphRAG 了解 | 读 1 篇论文 + LlamaIndex GraphRAG 文档 | 第 5 周末 |
-| **P3** | 轻量 React 管理台 | 可选：对话页 + trace 查看 | 第 12 周 |
+| Python（含 asyncio） | ★★★★★ | ✅ | 主语言锁定 |
+| FastAPI / 同类 Web | ★★★★☆ | ✅ | 保持 |
+| Pydantic / JSON Schema | ★★★★☆ | ✅ | 工具与结构化输出核心 |
+| Go/Java 第二语言 | ★★★☆☆ | 弱 | 简历写可适配；18 周不深挖 |
+| 高并发/队列/限流熔断 | ★★★★☆ | 网关可覆盖 | 用工程经验讲故事，项目里做够限流重试 |
+| Redis / PostgreSQL | ★★★★☆ | ✅ | 保持；pgvector 优先于再学一个云向量库 |
 
-### 5.3 不建议纳入 18 周主线的项
+### 4.2 Agent 核心
 
-| 技能 | 原因 |
-|---|---|
-| PyTorch 深度学习 / 模型训练 | JD 里算法岗才硬要求；应用岗“了解即可” |
-| Kubernetes 深度实战 | 中型岗 Docker Compose 够用；K8s 面试讲概念 |
-| 前端重型开发 | 多数 Agent 岗后端权重 70%+；轻量 demo 即可 |
-| 多 Agent 炫技 | 市场要“可靠单 Agent”，不是“八个 Agent 开会” |
-
----
-
-## 6. 岗位投递策略（结合调研）
-
-### 6.1 优先投递
-
-- AI Agent 开发工程师 / 智能体开发工程师 / 大模型应用工程师  
-- RAG 工程师 / LLM 应用工程师 / AI 后端工程师  
-- Agent 平台工程师（若旗舰项目含 MCP + 评测 + 多租户雏形）
-
-### 6.2 谨慎投递
-
-- 明确要求 2 年+ LangChain 商业经验、985 算法背景  
-- 大模型算法工程师（需训练/微调/paper）  
-- 纯 AIGC 生图/生视频算法岗（技能栈偏离）
-
-### 6.3 简历关键词建议（ATS 友好）
-
-```
-Python | FastAPI | LangChain | LangGraph | LlamaIndex | RAG | Agent | 
-Function Calling | MCP | Tool Use | Pydantic | PostgreSQL | pgvector | 
-Redis | Docker | OpenTelemetry | Langfuse | Prompt Engineering | 
-Structured Output | Human-in-the-loop | Evaluation | DeepSeek | 通义千问
-```
-
-### 6.4 薪资带宽参考（2026 Q2，仅供参考）
-
-| 城市/类型 | 经验要求 | 月薪带宽 |
+| 技能 | 频率 | 结论 |
 |---|---|---|
-| 北京/上海 大厂 | 3–5 年 | 30–60k × 15 薪 |
-| 一线中型公司 | 3–5 年 | 20–35k |
-| 二线/交付型 | 2–4 年 | 15–25k |
-| 创业早期 | 不限 | 面议，股权占比大 |
+| ReAct / 手写 Loop | ★★★★★ | P0；面试手撕 |
+| Function Calling / Tool Use | ★★★★★ | P0 |
+| **MCP** | ★★★★★↑ | **P0**；写 Server |
+| **LangGraph** | ★★★★★ | P0；主编排 |
+| **LangChain** | ★★★★★ | P0 级「显性使用」，非全模块精通 |
+| 记忆 / Session / Checkpointer | ★★★★☆↑ | P1 |
+| Plan-and-Execute | ★★★★☆ | 项目 Planner 覆盖 |
+| Skills 抽象 | ★★★★☆↑ | P1；与 MCP 一起讲 |
+| Multi-Agent | ★★★★☆↑ | P1 轻量 demo；主线单 Agent |
+| Context Engineering | ★★★★☆↑ | P1；叙事升级 |
+| Dify/Coze | ★★★☆☆ | P2 体验 |
+| AutoGen / CrewAI | ★★★☆☆ | P3 了解；勿主线 |
+| A2A | ★★☆☆☆↑ | P2 概念 |
 
-你有 10 年+ 工程经验，简历应突出 **系统设计与交付**，弱化“转岗学习”，强化“用工程方法构建 Agent 系统”。
+### 4.3 RAG
+
+| 技能 | 频率 | 结论 |
+|---|---|---|
+| RAG 全流程 | ★★★★★ | P0 |
+| 混合检索 + Rerank | ★★★★★ | P0 |
+| 引用 / 拒答 | ★★★★☆ | P0（企业可信） |
+| 向量库（Milvus/pgvector/Qdrant） | ★★★★☆ | pgvector 做深；Milvus 概念 |
+| Agentic RAG | ★★★☆☆↑ | P2 小实验 |
+| GraphRAG | ★★★☆☆ | P2/P3 概念 |
+| RAGAs 等评测库 | ★★★★☆ | 可选；自建 golden 更重要 |
+
+### 4.4 模型与 Prompt
+
+| 技能 | 频率 | 结论 |
+|---|---|---|
+| 多模型（DeepSeek/通义/OpenAI 兼容） | ★★★★☆ | P0（国内） |
+| Structured Output | ★★★★☆ | P0 |
+| Prompt / **Context Engineering** | ★★★★★ | 升级为上下文体系，不单卷话术 |
+| 微调 LoRA | ★★★☆☆ | 非主线 |
+| vLLM/私有化 | ★★★☆☆ | 概念即可 |
+
+### 4.5 工程化（中高级差异点）
+
+| 技能 | 频率 | 结论 |
+|---|---|---|
+| Docker Compose | ★★★★★ | P0 |
+| 评测体系 / golden set | ★★★★★↑ | P0；含轨迹 |
+| Trace / Langfuse/LangSmith | ★★★★★ | P0 二选一 |
+| 成本：路由/缓存/预算 | ★★★★☆↑ | P1 |
+| CI 回归 | ★★★★☆ | P0（smoke） |
+| K8s | ★★★☆☆ | 概念 |
+| AI Coding 工具 | ★★★★☆↑ | 日常使用 |
+
+### 4.6 框架招聘数据要点（海外 agentic 样本）
+
+- 市场雇的是 **stack**（常见点名约 2 个框架），不是单一赢家。  
+- LangChain 出现率最高（底座）；LangGraph 第二（有状态运行时）。  
+- **MCP 是跨框架最稳定的伴生技能**（约 17%–24% 与各框架共现）。  
+- LlamaIndex 更偏检索层；CrewAI/AutoGen 几乎从不单独出现。  
+- 含义：学 **LangChain 组件 + LangGraph 深 + MCP**，比「五个框架各玩一周」更贴市场。
 
 ---
 
-## 7. 技能对标总表（一页纸）
+## 5. 代表性 JD 信号（摘要）
 
-```
-市场需求                    你的原计划          优化后
-─────────────────────────────────────────────────────────
-Python/FastAPI              ✅                  ✅
-LangChain 生态              ⚠️ 弱              ✅ 显性纳入
-LangGraph                   ✅                  ✅
-OpenAI Agents SDK           ✅                  ✅
-LlamaIndex/RAG              ✅                  ✅
-MCP                         ❌                  ✅ 新增
-Skills                      ❌                  ✅ 新增
-Function Calling            ✅                  ✅
-记忆/Checkpointer           ⚠️ 弱              ✅ 加强
-多模型(含国内)              ⚠️ 弱              ✅ 加强
-Dify/Coze 认知              ❌                  ✅ 体验级
-评测体系                    ✅                  ✅
-安全/HITL                   ✅                  ✅
-Docker Compose              ✅                  ✅
-K8s                         ❌                  📖 概念级
-全栈 React                  ❌                  ⭕ 可选
-微调/训练                   ❌                  📖 了解即可
-```
+### 5.1 国内应用/平台型（高频交集）
+
+反复出现的职责块：
+
+1. LangGraph / LangChain / LlamaIndex 至少一种，复杂状态机或多 Agent  
+2. MCP 把 Agent 接到 DB / ERP / 内部知识库；工具注册、发现、鉴权、限流、监控  
+3. Skills 抽象：动态加载、版本、Schema  
+4. RAG 全链路优化；部分写知识图谱  
+5. 长文本、Token、状态持久化、Session；生产稳定与成本  
+6. 可观测、压测、Caching、异常容错  
+
+**启示**：你的旗舰模块划分（网关/RAG/MCP/Skills/HITL/Eval/Trace）与头部 JD **同构** —— 执行到位即可对标，无需换项目名。
+
+### 5.2 业务落地型（携程差旅 Agent 等）
+
+- 单/多 Agent、规划、工具、工作流  
+- RAG 高级优化（混合、重排、图谱融合）  
+- 幻觉、数据安全、上下文  
+- 2B 价值指标（效率、成本）  
+
+**启示**：作品集要有 **业务指标话术**，哪怕评测集是自建的。
+
+### 5.3 海外 Applied AI / MCP 岗
+
+- 编排、工具层、RAG、**evaluation harness**、观测  
+- MCP Server 暴露企业能力；多 Agent 协调为加分  
+- 「Applied AI ≈ reliability engineer」—— 评测不是加分项，是岗位本体  
+
+**启示**：第 13–14 周的评测与观测，决定你是「中级可交付」还是「只会 demo」。
+
+### 5.4 算法伪装岗（应避开的信号）
+
+JD 同时强调：PyTorch 训练、RLHF/SFT 落地、顶会、奖励函数设计 —— 与应用工程画像冲突时 **直接跳过**，避免浪费面试周期。
 
 ---
 
-## 8. 参考链接
+## 6. 面试高频考点（决定通过率）
+
+JD 常只写一行，面试会挖实现：
+
+| 考点 | 面试官想听 | 计划落点 |
+|---|---|---|
+| Agent vs Chatbot | 决策+工具+状态闭环 | 旗舰 1 分钟版 |
+| 手写 ReAct | Thought-Action-Observation；失败怎么办 | 第 6 周 |
+| 死循环 | max steps + 重复检测 + 熔断 | 第 6/8 周代码 |
+| MCP vs FC | 动态发现、N+M、资产化、权限 | 第 8 周 |
+| RAG 差 | 诊断→分块/混合/rerank→评测证明 | 第 4–5 周 badcase |
+| 记忆 | 工作/短期/长期；截断策略 | 第 7 周 |
+| 多 Agent 何时用 | 隔离 vs 通信成本；多数时候不用 | 第 12 周 + 讲稿 |
+| 成本 | 路由、缓存、工具子集、Workflow vs Agent | 第 14 周 |
+| Injection | 数据/指令隔离、工具描述审计 | 第 8/15 周 |
+| Context Engineering | 预算、检索、记忆、工具描述四支柱 | 第 2/7 周 |
+
+准备策略：**五张真实踩坑牌**（死循环、检索、MCP、成本、恢复）> 背 100 道题。
+
+---
+
+## 7. 技能投入产出矩阵（排期用）
+
+| 优先级 | 技能包 | 建议投入（18 周内） | 不投入的代价 |
+|---|---|---|---|
+| P0 | 网关+结构化+工具 | 2 周 | 无工程可信度 |
+| P0 | 可评测 RAG | 3 周 | 过不了企业知识库面 |
+| P0 | 手写 Loop + LangGraph + HITL | 2 周 | 过不了 Agent 手撕/系统设计 |
+| P0 | MCP + 安全底线 | 1 周（聚焦） | 丢 2026 硬筛选词 |
+| P0 | 旗舰合并 MVP | 4 周 | 无作品集 |
+| P0 | 评测轨迹+观测+部署 | 3 周 | 卡在「会做 demo」 |
+| P1 | Context/记忆/Skills/轻量多 Agent/成本 | 打散嵌入上述周 | 中高级面深度不够 |
+| P2 | Dify、Agentic RAG、GraphRAG 概念、SDK 对照 | ≤1 周合计 | 个别面试加分丢失 |
+| P3 | K8s 实操、重前端、微调、AutoGen 深挖 | **0** | 几乎无（对目标岗） |
+
+**砍掉清单的经济学**：每深挖一个 P3 框架 ≈ 牺牲半周评测或 MCP 深度；而招聘数据显示评测/MCP/LangGraph 的边际回报更高。
+
+---
+
+## 8. 与学习计划的对标总表
+
+```
+市场需求                         高效终局版计划
+────────────────────────────────────────────
+Python/FastAPI/Pydantic          ✅ 第1–2周+全程
+多模型含国内                     ✅ 第1–2周
+LangChain 显性                   ✅ 组件级，非全量
+LangGraph 深                     ✅ 第7周起主编排
+手写 Agent Loop                  ✅ 第6周
+RAG+评测                         ✅ 第3–5、13周
+Agentic RAG                      ✅ 第4周可选小实验
+MCP Server                       ✅ 第8周
+Skills                           ✅ 第11周（避免第8周爆炸）
+记忆/Checkpointer                ✅ 第7周
+Context Engineering              ✅ 第2/7周叙事与实现
+HITL/安全/injection              ✅ 第8、15周
+轨迹评测+Langfuse                ✅ 第13–14周
+轻量多 Agent                     ✅ 第12周可选
+Dify 对照                        ✅ 第12周2天
+成本路由缓存                     ✅ 第14周
+Docker Compose                   ✅ 第12、15周
+K8s/微调/AutoGen主线             ❌ 明确不学
+```
+
+旧版「重大缺口（MCP/LangChain）」在 6 月补丁后已进主线；7 月增量是 **Context Engineering 叙事、轨迹评测、轻量多 Agent、框架做减法**。
+
+---
+
+## 9. 简历与投递
+
+### 9.1 ATS 关键词串
+
+```text
+Python | FastAPI | Pydantic | LangChain | LangGraph | RAG | Agentic RAG |
+Agent | MCP | Function Calling | Context Engineering | Structured Output |
+Human-in-the-loop | Checkpointer | pgvector | PostgreSQL | Redis | Docker |
+Langfuse | Evaluation | Trajectory Eval | DeepSeek | 通义
+```
+
+### 9.2 年限包装原则
+
+- 突出：**系统设计、稳定性、权限、观测、0→1 交付**  
+- 弱化：「刚转行 / 在学 AI」  
+- 对冲「2 年 LangChain」：用 **项目深度 + 关键词覆盖 + 可运行仓库**，不伪造工龄  
+
+### 9.3 薪资带宽（仅供预期管理，2026 上半年公开信息）
+
+| 类型 | 经验口径 | 月薪体感 |
+|---|---|---|
+| 一线大厂应用/Agent | 3–5 年+ | 约 30–60k 级（含多薪） |
+| 一线/新一线中型 | 3–5 年 | 约 20–40k |
+| 二线/交付型 | 2–4 年 | 约 15–25k |
+| 垂直行业 Agent | 视业务 | 带宽大，看落地经验 |
+
+10 年工程背景应走 **中高级应用/平台** 叙事，避免与应届「调过 API」简历同质化内卷。
+
+### 9.4 投递漏斗建议
+
+1. 先投与旗舰同构的 JD（MCP+RAG+LangGraph）。  
+2. 每面必更新：题库 + README 弱点。  
+3. 连续同质挂在「无评测/无 MCP」时，优先补作品而非改投算法岗。
+
+---
+
+## 10. 参考链接（抽样）
 
 | 资源 | 链接 |
 |---|---|
-| 腾讯 PCG Agent 工程师 JD | https://www.liepin.com/job/1982715501.shtml |
-| 字节 Coze Agent 开发 JD | https://www.liepin.com/job/1983380283.shtml |
-| 字节开发者服务 Agent JD | https://www.liepin.com/job/1983380379.shtml |
-| 字节 AI for Science Agent 平台 JD | https://www.liepin.com/job/1983540379.shtml |
-| 联想教育 Agent 工程师 JD | https://www.zhaopin.com/jobdetail/CC840683300J40856094311.htm |
-| 中创智维 Agent 工程师 JD | https://www.zhaopin.com/jobdetail/CC272222130J40712519014.htm |
-| 蓬勃科技 Agent 工程师 JD | https://www.zhaopin.com/jobdetail/CCL1328897090J40847638001.htm |
-| 2026 大厂 Agent 面试风向标 | https://blog.csdn.net/2301_80239908/article/details/161399535 |
-| MCP 官方文档 | https://modelcontextprotocol.io/ |
-| Dify 文档 | https://docs.dify.ai/ |
-| LangChain 文档 | https://docs.langchain.com/ |
+| MCP 官方 | https://modelcontextprotocol.io/ |
+| LangGraph | https://docs.langchain.com/oss/python/langgraph/overview |
+| 框架招聘统计（2026） | https://agentic-engineering-jobs.com/ai-agent-frameworks-job-market-2026 |
+| 后端→Agent 转型（JavaGuide） | https://javaguide.cn/roadmap/backend-to-ai-agent-roadmap.html |
+| AI Engineer 高信号项目 | https://technovids.com/ai-engineer-projects |
+| 猎聘类智能体/MCP JD | 以当时在线 JD 为准（MCP、LangGraph、Skills、可观测为高频字段） |
+| 学习计划正文 | [Agent中级开发工程师学习计划（终极攻略版）.md](./Agent中级开发工程师学习计划（终极攻略版）.md) |
 
 ---
 
-## 9. 结论
+## 11. 最终研判
 
-1. **方向正确**：你的原计划与 2026 年 Agent 应用工程师主流 JD 同向，工程化、评测、安全是正确壁垒。  
-2. **最大缺口是 MCP**：已从“加分项”变为多个大厂/中型公司的硬性或半硬性要求，必须纳入学习主线。  
-3. **LangChain 要显性出现**：很多 JD 写“2 年 LangChain 经验”，仅学 LangGraph 不够，需在简历和项目中体现 LangChain 生态使用。  
-4. **国内大模型适配是差异化**：纯 OpenAI 栈在国内投递面窄，ModelGateway 加 1–2 个国内模型很实用。  
-5. **面试考系统不考名词**：准备好死循环防御、检索优化、MCP 架构、成本/trace 四张王牌即可覆盖大部分技术面。
+1. **值得花 360 小时**：工程化 Agent + 可评测 RAG + MCP + 观测回归 —— 与 2026-07 招聘主需求对齐。  
+2. **不值得花主线时间**：多框架集邮、重前端、训练微调、K8s 深度、AutoGen 深挖。  
+3. **中高级差异化**：不是「也会 LangChain」，而是 **评测轨迹 + 成本账 + 安全边界 + 能讲清取舍的旗舰系统**。  
+4. **执行纪律**：每周只完成路线图上最重要的一件可演示事；范围膨胀是转型失败的第一原因。
 
-> 下一步：参见更新后的 [Agent中级开发工程师学习计划（终极攻略版）.md](./Agent中级开发工程师学习计划（终极攻略版）.md) 第 15 节「招聘市场对标补丁」。
+> 下一步：严格按更新后的学习计划推进仓库 `coding/projects/01`→`06`；每 4 周用本文 §7 矩阵自检是否在学 P3 垃圾时间。

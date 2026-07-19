@@ -78,11 +78,14 @@ def print_table(stats: list[ModeStats], *, provider: str, prompt: str) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
+    # argparse.ArgumentParser 用于命令行参数解析：
+    # 相当于 TypeScript yargs/yargs-parser、C++ getopt，帮助从命令行读取参数、自动生成帮助文档。
     parser = argparse.ArgumentParser(description="structured output mode comparison")
     parser.add_argument("--provider", default="mock", help="provider name (default: mock)")
     parser.add_argument("--model", default=None, help="model override")
     parser.add_argument("-n", "--attempts", type=int, default=3, help="trials per mode")
     parser.add_argument("--prompt", default=DEFAULT_PROMPT, help="user prompt")
+    # Python 解析命令行参数，与 TypeScript `yargs.parse(argv)` 作用类似；此处将 argv 传递给 ArgumentParser 以便测试时可以传递自定义参数。
     args = parser.parse_args(argv)
 
     stats = run_experiment(
