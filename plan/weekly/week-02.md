@@ -55,13 +55,13 @@
 
 ---
 
-## D13 · 周六 07-04 · 通义 + 降级（可选）
+## D13 · 周六 07-04 · 通义 + 降级（可选）✅ 精华
 
-| 学习 30m | DashScope OpenAI 兼容接口 |
-| 编码 90m | `adapters/dashscope` 或复用 `OpenAICompatAdapter` |
-| 编码 30m | DeepSeek 失败时 fallback 到 moonshot / dashscope |
-| 测试 45m | mock 主模型失败走 fallback |
-| 文档 30m | `notes/projects/P1-总结.md` 初稿 |
+| 学习 30m | **retry ≠ fallback**；何种错误才切厂商；FC 闭环为何暂不做 failover |
+| 编码 — | 跳过：通义与 D12 同构；降级链以后实操 |
+| 文档 30m | `notes/concepts/09-Fallback降级链.md` |
+
+**取舍**：适配器重复劳动不学；P1 总结初稿并入 D14。
 
 ---
 
@@ -74,6 +74,6 @@
 | 计划 15m | 周一：创建 P2 项目骨架 |
 
 **周验收**：
-- [ ] DeepSeek + Moonshot（或通义）双模型可切换
-- [ ] 工具参数错误可捕获
-- [ ] P1 README 完整
+- [x] DeepSeek + Moonshot（或通义）双模型可切换
+- [x] 工具参数错误可捕获
+- [ ] P1 README 完整（D14）

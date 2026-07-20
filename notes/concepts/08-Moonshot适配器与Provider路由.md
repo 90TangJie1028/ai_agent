@@ -63,4 +63,4 @@ pytest -m integration tests/test_moonshot_routing.py
 
 ## 和 D11 的关系
 
-D11 证明 **同一 adapter** 上 FC 闭环能跑；D12 证明 **换 provider** 只改配置，不改 `chat` / `chat_with_tools` 主路径。D13 再在此之上做 fallback。
+D11 证明 **同一 adapter** 上 FC 闭环能跑；D12 证明 **换 provider** 只改配置，不改 `chat` / `chat_with_tools` 主路径。D13 只收 **retry ≠ fallback** 概念（见 `09-Fallback降级链.md`），代码以后实操。
