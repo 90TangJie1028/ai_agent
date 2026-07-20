@@ -129,7 +129,7 @@ def load_providers() -> dict[str, ProviderConfig]:
         "MOONSHOT_API_KEY",
         "MOONSHOT_BASE_URL",
         "MOONSHOT_MODEL",
-        "moonshot-v1-8k",
+        "kimi-k2.6",
         "https://api.moonshot.cn/v1",
     )
     if moonshot:

@@ -44,12 +44,14 @@
 
 ---
 
-## D12 · 周五 07-03 · Kimi / Moonshot 第二适配器
+## D12 · 周五 07-03 · Kimi / Moonshot 第二适配器 ✅
 
 | 学习 30m | Moonshot API 与 DeepSeek 差异（base_url、模型名） |
 | 编码 120m | `adapters/moonshot.py`；`ModelRouter` 按 provider 路由 |
 | 测试 45m | 同一 prompt 在 deepseek / moonshot 各调 1 次（integration） |
 | 文档 30m | `.env.example` 补充 MOONSHOT 字段 |
+
+**产物**：默认模型 `kimi-k2.6`；`tests/test_moonshot_routing.py` + `scripts/d12_dual_provider_debug.py`；笔记 `08-Moonshot适配器与Provider路由.md` |
 
 ---
 

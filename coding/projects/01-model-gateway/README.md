@@ -48,6 +48,10 @@ pip install -e ".[dev]"
 DEEPSEEK_API_KEY=你的key
 DEFAULT_PROVIDER=deepseek
 DEFAULT_MODEL=deepseek-chat
+
+# 双模型（D12）
+MOONSHOT_API_KEY=你的key
+MOONSHOT_MODEL=kimi-k2.6
 ```
 
 ### 常用命令

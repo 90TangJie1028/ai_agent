@@ -12,6 +12,12 @@ models:
   moonshot-v1-8k:
     input_per_million: 0.20
     output_per_million: 0.20
+  kimi-k2.6:
+    input_per_million: 0.60
+    output_per_million: 2.50
+  kimi-k2.7-code:
+    input_per_million: 0.60
+    output_per_million: 2.50
   qwen-plus:
     input_per_million: 0.40
     output_per_million: 1.20
